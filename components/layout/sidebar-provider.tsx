@@ -1,0 +1,49 @@
+"use client";
+
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useMemo,
+  type ReactNode,
+} from "react";
+
+interface SidebarContextType {
+  isOpen: boolean;
+  openSidebar: () => void;
+  closeSidebar: () => void;
+  toggleSidebar: () => void;
+}
+
+const SidebarContext = createContext<SidebarContextType | null>(null);
+
+export function SidebarProvider({ children }: { children: ReactNode }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const openSidebar = useCallback(() => setIsOpen(true), []);
+  const closeSidebar = useCallback(() => setIsOpen(false), []);
+  const toggleSidebar = useCallback(() => setIsOpen((prev) => !prev), []);
+
+  const value = useMemo(
+    () => ({
+      isOpen,
+      openSidebar,
+      closeSidebar,
+      toggleSidebar,
+    }),
+    [isOpen, openSidebar, closeSidebar, toggleSidebar]
+  );
+
+  return (
+    <SidebarContext.Provider value={value}>{children}</SidebarContext.Provider>
+  );
+}
+
+export function useSidebar() {
+  const context = useContext(SidebarContext);
+  if (!context) {
+    throw new Error("useSidebar must be used within SidebarProvider");
+  }
+  return context;
+}
