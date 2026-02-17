@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Loading01Icon } from "@hugeicons/core-free-icons";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -101,7 +102,7 @@ export function RegisterForm() {
         <Button type="submit" className="w-full h-11" disabled={isPending}>
           {isPending ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <HugeiconsIcon icon={Loading01Icon} className="mr-2 h-4 w-4 animate-spin" />
               Creating account...
             </>
           ) : (

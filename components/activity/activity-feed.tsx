@@ -3,7 +3,14 @@
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { UserPlus, UserMinus, UserCheck, ShieldCheck, FileText } from "lucide-react";
+import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
+import {
+  UserAdd01Icon,
+  UserMinus01Icon,
+  UserCheck01Icon,
+  SecurityCheckIcon,
+  File01Icon,
+} from "@hugeicons/core-free-icons";
 
 interface ActivityFeedProps {
   organizationId?: Id<"organizations">;
@@ -21,34 +28,26 @@ export function ActivityFeed({ organizationId, limit = 20 }: ActivityFeedProps) 
   if (activity === undefined) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <div className="w-4 h-4 border-2 border-muted-foreground/30 border-t-foreground rounded-full animate-spin" />
       </div>
     );
   }
 
   if (activity.length === 0) {
     return (
-      <div className="text-center py-16">
-        <FileText className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
+      <div className="text-center py-14">
+        <HugeiconsIcon icon={File01Icon} className="h-6 w-6 text-muted-foreground/25 mx-auto mb-2" />
         <p className="text-sm text-muted-foreground">No activity yet</p>
       </div>
     );
   }
 
-  const getActionIcon = (action: string) => {
-    if (action.includes("invited")) return UserPlus;
-    if (action.includes("joined")) return UserCheck;
-    if (action.includes("removed") || action.includes("left")) return UserMinus;
-    if (action.includes("role")) return ShieldCheck;
-    return FileText;
-  };
-
-  const getActionColor = (action: string) => {
-    if (action.includes("invited")) return "text-blue-500 bg-blue-500/10";
-    if (action.includes("joined")) return "text-emerald-500 bg-emerald-500/10";
-    if (action.includes("removed") || action.includes("left")) return "text-rose-500 bg-rose-500/10";
-    if (action.includes("role")) return "text-violet-500 bg-violet-500/10";
-    return "text-muted-foreground bg-muted";
+  const getActionIcon = (action: string): IconSvgElement => {
+    if (action.includes("invited")) return UserAdd01Icon;
+    if (action.includes("joined")) return UserCheck01Icon;
+    if (action.includes("removed") || action.includes("left")) return UserMinus01Icon;
+    if (action.includes("role")) return SecurityCheckIcon;
+    return File01Icon;
   };
 
   const getActionText = (
@@ -72,22 +71,20 @@ export function ActivityFeed({ organizationId, limit = 20 }: ActivityFeedProps) 
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-0.5">
       {activity.map((log) => {
-        const Icon = getActionIcon(log.action);
-        const colorClass = getActionColor(log.action);
-        const [iconColor, iconBg] = colorClass.split(" ");
+        const actionIcon = getActionIcon(log.action);
 
         return (
           <div
             key={log._id}
-            className="flex items-start gap-3 p-4 rounded-lg border hover:bg-muted/30 transition-colors"
+            className="flex items-start gap-3 p-3 rounded-md hover:bg-accent transition-colors"
           >
-            <div className={`p-2 rounded-lg shrink-0 ${iconBg}`}>
-              <Icon className={`h-4 w-4 ${iconColor}`} />
+            <div className="p-1.5 rounded-md bg-muted shrink-0 mt-0.5">
+              <HugeiconsIcon icon={actionIcon} className="h-3.5 w-3.5 text-muted-foreground" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm">
+              <p className="text-[13px]">
                 <span className="font-medium">{log.user?.name ?? "Someone"}</span>{" "}
                 <span className="text-muted-foreground">
                   {getActionText(log.action, log.metadata as Record<string, string | undefined> | undefined)}
@@ -98,7 +95,7 @@ export function ActivityFeed({ organizationId, limit = 20 }: ActivityFeedProps) 
                   </span>
                 )}
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-0.5">
                 {new Date(log.timestamp).toLocaleDateString("en-US", {
                   month: "short",
                   day: "numeric",

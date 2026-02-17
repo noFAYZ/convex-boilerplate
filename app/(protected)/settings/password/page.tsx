@@ -6,9 +6,9 @@ import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Shield, CheckCircle2, AlertCircle, Lock, Eye, EyeOff } from "lucide-react";
+import { CheckCircle2, AlertCircle, Eye, EyeOff, Check } from "lucide-react";
 
 export default function PasswordSettingsPage() {
   const changePassword = useAction(api.password.changePassword);
@@ -64,28 +64,23 @@ export default function PasswordSettingsPage() {
 
   return (
     <div className="max-w-2xl space-y-6">
-      <div className="space-y-2">
-        <div className="flex items-center gap-2 text-primary">
-          <Shield className="h-5 w-5" />
-          <h1 className="text-3xl font-bold">Password & Security</h1>
-        </div>
-        <p className="text-muted-foreground">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-bold tracking-tight">
+          Password & Security
+        </h1>
+        <p className="text-sm text-muted-foreground">
           Manage your password and keep your account secure
         </p>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Lock className="h-5 w-5" />
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold">
             Change Password
           </CardTitle>
-          <CardDescription>
-            Update your password regularly to keep your account secure
-          </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
@@ -94,7 +89,7 @@ export default function PasswordSettingsPage() {
             )}
 
             {success && (
-              <Alert className="border-green-200 bg-green-50 text-green-900 dark:border-green-800 dark:bg-green-950 dark:text-green-100">
+              <Alert>
                 <CheckCircle2 className="h-4 w-4" />
                 <AlertDescription>Password changed successfully!</AlertDescription>
               </Alert>
@@ -119,9 +114,9 @@ export default function PasswordSettingsPage() {
                   tabIndex={-1}
                 >
                   {showCurrentPassword ? (
-                    <EyeOff className="h-4 w-4" />
+                    <EyeOff className="h-3.5 w-3.5" />
                   ) : (
-                    <Eye className="h-4 w-4" />
+                    <Eye className="h-3.5 w-3.5" />
                   )}
                 </button>
               </div>
@@ -149,27 +144,26 @@ export default function PasswordSettingsPage() {
                   tabIndex={-1}
                 >
                   {showNewPassword ? (
-                    <EyeOff className="h-4 w-4" />
+                    <EyeOff className="h-3.5 w-3.5" />
                   ) : (
-                    <Eye className="h-4 w-4" />
+                    <Eye className="h-3.5 w-3.5" />
                   )}
                 </button>
               </div>
               {newPassword && (
-                <div className="mt-3 space-y-2">
-                  <p className="text-xs font-medium text-muted-foreground">Password strength:</p>
-                  <div className="space-y-1.5">
-                    {passwordRequirements.map((req, i) => (
-                      <div key={i} className="flex items-center gap-2 text-xs">
-                        <div className={`w-4 h-4 rounded-full flex items-center justify-center ${req.met ? "bg-green-100 dark:bg-green-950" : "bg-muted"}`}>
-                          {req.met && <CheckCircle2 className="h-3 w-3 text-green-600 dark:text-green-400" />}
-                        </div>
-                        <span className={req.met ? "text-green-600 dark:text-green-400" : "text-muted-foreground"}>
-                          {req.text}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+                <div className="mt-2 space-y-1.5">
+                  {passwordRequirements.map((req, i) => (
+                    <div key={i} className="flex items-center gap-2 text-xs">
+                      {req.met ? (
+                        <Check className="h-3 w-3 text-muted-foreground" />
+                      ) : (
+                        <div className="w-3 h-3 rounded-full border border-border" />
+                      )}
+                      <span className={req.met ? "text-foreground" : "text-muted-foreground"}>
+                        {req.text}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -193,9 +187,9 @@ export default function PasswordSettingsPage() {
                   tabIndex={-1}
                 >
                   {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4" />
+                    <EyeOff className="h-3.5 w-3.5" />
                   ) : (
-                    <Eye className="h-4 w-4" />
+                    <Eye className="h-3.5 w-3.5" />
                   )}
                 </button>
               </div>
@@ -207,35 +201,23 @@ export default function PasswordSettingsPage() {
               )}
             </div>
 
-            <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
+            <Button type="submit" disabled={isLoading} size="sm">
               {isLoading ? "Changing Password..." : "Change Password"}
             </Button>
           </form>
         </CardContent>
       </Card>
 
-      <Card className="border-dashed">
-        <CardHeader>
-          <CardTitle className="text-base">Security Tips</CardTitle>
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold">Security Tips</CardTitle>
         </CardHeader>
         <CardContent>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li className="flex gap-2">
-              <span className="text-primary">•</span>
-              <span>Use a unique password that you don&apos;t use elsewhere</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-primary">•</span>
-              <span>Avoid common words and character patterns</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-primary">•</span>
-              <span>Consider using a password manager</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-primary">•</span>
-              <span>Change your password regularly</span>
-            </li>
+          <ul className="space-y-1.5 text-[13px] text-muted-foreground">
+            <li>Use a unique password that you don&apos;t use elsewhere</li>
+            <li>Avoid common words and character patterns</li>
+            <li>Consider using a password manager</li>
+            <li>Change your password regularly</li>
           </ul>
         </CardContent>
       </Card>

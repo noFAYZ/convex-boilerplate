@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileUpload } from "@/components/upload/file-upload";
-import { Loader2, Check } from "lucide-react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Loading01Icon, Tick01Icon } from "@hugeicons/core-free-icons";
 
 export default function ProfileSettingsPage() {
   const currentUser = useQuery(api.users.getCurrent);
@@ -62,7 +63,7 @@ export default function ProfileSettingsPage() {
   if (!currentUser) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        <HugeiconsIcon icon={Loading01Icon} className="h-4 w-4 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -71,14 +72,14 @@ export default function ProfileSettingsPage() {
     <div className="max-w-2xl space-y-6">
       <div className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight">Profile</h1>
-        <p className="text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Manage your personal information
         </p>
       </div>
 
       <Card>
-        <CardHeader className="pb-4">
-          <CardTitle className="text-base">Personal Information</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold">Personal Information</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -122,7 +123,7 @@ export default function ProfileSettingsPage() {
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <HugeiconsIcon icon={Loading01Icon} className="mr-2 h-4 w-4 animate-spin" />
                     Saving...
                   </>
                 ) : (
@@ -130,8 +131,8 @@ export default function ProfileSettingsPage() {
                 )}
               </Button>
               {isSaved && (
-                <span className="text-sm text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                  <Check className="h-4 w-4" />
+                <span className="text-sm text-muted-foreground flex items-center gap-1">
+                  <HugeiconsIcon icon={Tick01Icon} className="h-3.5 w-3.5" />
                   Saved
                 </span>
               )}
@@ -140,9 +141,9 @@ export default function ProfileSettingsPage() {
         </CardContent>
       </Card>
 
-      <Card className="border-destructive/30">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-base text-destructive">Danger Zone</CardTitle>
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold text-destructive">Danger Zone</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">

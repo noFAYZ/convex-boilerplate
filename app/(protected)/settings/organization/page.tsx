@@ -8,7 +8,6 @@ import { InviteMemberDialog } from "@/components/organizations/invite-member-dia
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -26,7 +25,7 @@ export default function OrganizationSettingsPage() {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
 
-  const activeOrg = organizations?.[0]; // For demo, use first org
+  const activeOrg = organizations?.[0];
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,25 +45,32 @@ export default function OrganizationSettingsPage() {
   };
 
   if (!organizations) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="w-4 h-4 border-2 border-muted-foreground/30 border-t-foreground rounded-full animate-spin" />
+      </div>
+    );
   }
 
   if (!activeOrg || organizations.length === 0) {
     return (
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold">Create Your First Organization</h1>
+      <div className="max-w-2xl space-y-6">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold tracking-tight">
+            Create Your First Organization
+          </h1>
+        </div>
 
-        <Card className="max-w-2xl">
-          <CardHeader>
-            <CardTitle>Organization Details</CardTitle>
-            <CardDescription>
-              Create an organization to collaborate with your team
-            </CardDescription>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-semibold">
+              Organization Details
+            </CardTitle>
           </CardHeader>
           <form onSubmit={handleCreate}>
             <CardContent className="space-y-4">
               {error && (
-                <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
+                <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md border border-destructive/20">
                   {error}
                 </div>
               )}
@@ -98,7 +104,7 @@ export default function OrganizationSettingsPage() {
                 </p>
               </div>
 
-              <Button type="submit" disabled={creating}>
+              <Button type="submit" disabled={creating} size="sm">
                 {creating ? "Creating..." : "Create Organization"}
               </Button>
             </CardContent>
@@ -109,11 +115,13 @@ export default function OrganizationSettingsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Organization Settings</h1>
-          <p className="text-muted-foreground">{activeOrg.name}</p>
+    <div className="max-w-4xl space-y-6">
+      <div className="flex items-start justify-between">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold tracking-tight">
+            Organization Settings
+          </h1>
+          <p className="text-sm text-muted-foreground">{activeOrg.name}</p>
         </div>
         <InviteMemberDialog organizationId={activeOrg._id} />
       </div>

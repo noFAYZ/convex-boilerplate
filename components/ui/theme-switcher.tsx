@@ -2,7 +2,8 @@
 
 import * as React from "react"
 import { useTheme } from "next-themes"
-import { Sun, Moon } from "lucide-react"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { Sun01Icon, Moon01Icon } from "@hugeicons/core-free-icons"
 
 import { cn } from "@/lib/utils"
 import { Button } from "./button"
@@ -17,14 +18,10 @@ function ThemeSwitcher() {
   }, [])
 
   const toggleTheme = () => {
-
-      // In beginner mode, cycle between light and dark
-      const currentIsDark = theme === "dark"  
+      const currentIsDark = theme === "dark"
       setTheme(currentIsDark ? "light" : "dark")
-    
   }
 
-  // Show a neutral state during SSR/initial load
   if (!mounted) {
     return (
       <Button
@@ -38,7 +35,7 @@ function ThemeSwitcher() {
         size="sm"
         variant="ghost"
       >
-        <Sun className="w-4 h-4 text-default-500" />
+        <HugeiconsIcon icon={Sun01Icon} className="w-4 h-4 text-default-500" />
       </Button>
     )
   }
@@ -65,7 +62,8 @@ function ThemeSwitcher() {
           isDark ? "scale-0 opacity-0 translate-y-5" : "scale-100 opacity-100 translate-y-0"
         )}
       >
-        <Sun
+        <HugeiconsIcon
+          icon={Sun01Icon}
           className={cn(
             "w-4.5 h-4.5",
             "text-orange-500",
@@ -73,10 +71,9 @@ function ThemeSwitcher() {
             "group-hover:rotate-90"
           )}
         />
-    
       </div>
 
-      {/* Moon & Stars */}
+      {/* Moon */}
       <div
         className={cn(
           "absolute inset-0 flex items-center justify-center",
@@ -84,7 +81,8 @@ function ThemeSwitcher() {
           isDark ? "scale-100 opacity-100 translate-y-0" : "scale-0 opacity-0 -translate-y-5"
         )}
       >
-        <Moon
+        <HugeiconsIcon
+          icon={Moon01Icon}
           className={cn(
             "w-4.5 h-4.5",
             "text-white/60",
