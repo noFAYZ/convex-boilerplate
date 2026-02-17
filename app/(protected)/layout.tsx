@@ -14,23 +14,22 @@ export default function ProtectedLayoutWrapper({
     <ProtectedLayout>
       <OrgProvider>
         <SidebarProvider>
-          <div className="flex h-screen overflow-hidden bg-muted/30">
-            {/* Sidebar */}
+          <div className="flex h-screen overflow-hidden bg-background">
             <Sidebar />
 
-            {/* Main Content */}
             <div className="flex flex-col flex-1 overflow-hidden">
               {/* Mobile Header */}
-              <header className="lg:hidden border-b bg-card px-4 py-3 shadow-sm">
-                <div className="flex items-center gap-3">
-                  <SidebarToggle />
-                  <h1 className="text-lg font-semibold">Convex Boilerplate</h1>
+              <header className="lg:hidden border-b bg-card/80 backdrop-blur-xl px-4 h-14 flex items-center gap-3 sticky top-0 z-30">
+                <SidebarToggle />
+                <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center text-primary-foreground font-bold text-[10px]">
+                  CB
                 </div>
+                <span className="text-sm font-semibold">Convex Boilerplate</span>
               </header>
 
-              {/* Main Content Area */}
+              {/* Main Content */}
               <main className="flex-1 overflow-y-auto">
-                <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                   {children}
                 </div>
               </main>

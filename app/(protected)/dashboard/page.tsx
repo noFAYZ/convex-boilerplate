@@ -2,11 +2,19 @@
 
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useOrganization } from "@/components/organizations/org-context";
-import { Building2, Users, Activity, ArrowRight, Clock } from "lucide-react";
+import {
+  Building2,
+  Users,
+  Activity,
+  ArrowRight,
+  ArrowUpRight,
+  UserPlus,
+  Settings,
+} from "lucide-react";
 
 export default function DashboardPage() {
   const user = useQuery(api.users.getCurrent);
@@ -19,141 +27,179 @@ export default function DashboardPage() {
 
   const recentActivity = useQuery(
     api.activity.list,
-    currentOrganization ? { organizationId: currentOrganization._id, limit: 5 } : "skip"
+    currentOrganization
+      ? { organizationId: currentOrganization._id, limit: 5 }
+      : "skip"
   );
 
   const stats = [
     {
       title: "Organizations",
       value: organizations?.length ?? 0,
-      description: "Total organizations",
       icon: Building2,
       href: "/settings/organization",
-      color: "text-blue-600",
-      bgColor: "bg-blue-50 dark:bg-blue-950/30",
+      color: "text-violet-500 dark:text-violet-400",
+      bg: "bg-violet-500/10",
     },
     {
       title: "Team Members",
       value: members?.length ?? 0,
-      description: "Active members",
       icon: Users,
       href: "/team",
-      color: "text-purple-600",
-      bgColor: "bg-purple-50 dark:bg-purple-950/30",
+      color: "text-blue-500 dark:text-blue-400",
+      bg: "bg-blue-500/10",
     },
     {
       title: "Activities",
       value: recentActivity?.length ?? 0,
-      description: "Recent events",
       icon: Activity,
       href: "/activity",
-      color: "text-green-600",
-      bgColor: "bg-green-50 dark:bg-green-950/30",
+      color: "text-emerald-500 dark:text-emerald-400",
+      bg: "bg-emerald-500/10",
     },
   ];
 
+  const getTimeGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
+  };
+
   return (
     <div className="space-y-8">
-      <div className="space-y-2">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Clock className="h-4 w-4" />
-          <span>{new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</span>
-        </div>
-        <h1 className="text-4xl font-bold tracking-tight">Welcome back, {user?.name ?? "User"}!</h1>
-        <p className="text-muted-foreground">Here&apos;s your organization overview</p>
+      {/* Header */}
+      <div className="space-y-1">
+        <h1 className="text-3xl font-bold tracking-tight">
+          {getTimeGreeting()}, {user?.name?.split(" ")[0] ?? "there"}
+        </h1>
+        <p className="text-muted-foreground">
+          Here&apos;s what&apos;s happening in{" "}
+          {currentOrganization?.name ?? "your workspace"}
+        </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      {/* Stats */}
+      <div className="grid gap-4 sm:grid-cols-3">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.title} className="group hover:shadow-md transition-all">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className={`p-2 rounded-lg ${stat.bgColor}`}>
-                    <Icon className={`h-5 w-5 ${stat.color}`} />
+            <Link key={stat.title} href={stat.href}>
+              <Card className="group hover:shadow-md transition-all duration-200 hover:border-primary/20 cursor-pointer">
+                <CardContent className="p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className={`p-2 rounded-lg ${stat.bg}`}>
+                      <Icon className={`h-4 w-4 ${stat.color}`} />
+                    </div>
+                    <ArrowUpRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
-                </div>
-                <CardTitle className="text-sm font-medium text-muted-foreground mt-4">{stat.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-end justify-between">
-                  <div>
-                    <div className="text-3xl font-bold">{stat.value}</div>
-                    <p className="text-xs text-muted-foreground">{stat.description}</p>
-                  </div>
-                  <Link href={stat.href}>
-                    <Button variant="ghost" size="sm" className="h-8 gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="text-2xl font-bold">{stat.value}</div>
+                  <p className="text-sm text-muted-foreground">{stat.title}</p>
+                </CardContent>
+              </Card>
+            </Link>
           );
         })}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Common tasks</CardDescription>
+      {/* Content Grid */}
+      <div className="grid gap-6 lg:grid-cols-5">
+        {/* Quick Actions */}
+        <Card className="lg:col-span-2">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base">Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {(!organizations || organizations.length === 0) ? (
-              <Button className="w-full justify-start" variant="outline" asChild>
-                <Link href="/settings/organization">
-                  <Building2 className="mr-2 h-4 w-4" />
-                  Create Organization
-                </Link>
+            <Link href="/team" className="block">
+              <Button
+                variant="outline"
+                className="w-full justify-start h-11 gap-3 font-normal"
+              >
+                <div className="p-1 rounded bg-blue-500/10">
+                  <UserPlus className="h-3.5 w-3.5 text-blue-500" />
+                </div>
+                Invite Team Member
               </Button>
-            ) : (
-              <>
-                <Button className="w-full justify-start" variant="outline" asChild>
-                  <Link href="/team">
-                    <Users className="mr-2 h-4 w-4" />
-                    Manage Team
-                  </Link>
-                </Button>
-                <Button className="w-full justify-start" variant="outline" asChild>
-                  <Link href="/settings/organization">
-                    <Building2 className="mr-2 h-4 w-4" />
-                    Settings
-                  </Link>
-                </Button>
-              </>
-            )}
+            </Link>
+            <Link href="/settings/organization" className="block">
+              <Button
+                variant="outline"
+                className="w-full justify-start h-11 gap-3 font-normal"
+              >
+                <div className="p-1 rounded bg-violet-500/10">
+                  <Settings className="h-3.5 w-3.5 text-violet-500" />
+                </div>
+                Organization Settings
+              </Button>
+            </Link>
+            <Link href="/activity" className="block">
+              <Button
+                variant="outline"
+                className="w-full justify-start h-11 gap-3 font-normal"
+              >
+                <div className="p-1 rounded bg-emerald-500/10">
+                  <Activity className="h-3.5 w-3.5 text-emerald-500" />
+                </div>
+                View Activity Log
+              </Button>
+            </Link>
           </CardContent>
         </Card>
 
-        {recentActivity && recentActivity.length > 0 && (
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Recent Activity</CardTitle>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link href="/activity">View All</Link>
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
+        {/* Recent Activity */}
+        <Card className="lg:col-span-3">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">Recent Activity</CardTitle>
+              <Button variant="ghost" size="sm" className="text-xs h-8 gap-1" asChild>
+                <Link href="/activity">
+                  View all
+                  <ArrowRight className="h-3 w-3" />
+                </Link>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {recentActivity && recentActivity.length > 0 ? (
+              <div className="space-y-1">
                 {recentActivity.slice(0, 5).map((activity) => (
-                  <div key={activity._id} className="flex gap-3 text-sm pb-3 border-b last:border-0">
-                    <div className="w-2 h-2 rounded-full bg-primary mt-1.5" />
-                    <div className="flex-1">
-                      <p className="font-medium">{activity.action}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(activity.timestamp).toLocaleString()}
+                  <div
+                    key={activity._id}
+                    className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="w-2 h-2 rounded-full bg-primary mt-2 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        {activity.user?.name ?? "Someone"}{" "}
+                        <span className="font-normal text-muted-foreground">
+                          {activity.action.replace(".", " ")}
+                        </span>
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {new Date(activity.timestamp).toLocaleDateString(
+                          "en-US",
+                          {
+                            month: "short",
+                            day: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                          }
+                        )}
                       </p>
                     </div>
                   </div>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        )}
+            ) : (
+              <div className="text-center py-8">
+                <Activity className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground">
+                  No recent activity
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

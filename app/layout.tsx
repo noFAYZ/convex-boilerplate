@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono,DM_Sans } from "next/font/google";
 import "./globals.css";
 import { ConvexClientProvider } from "@/components/providers/convex-provider";
+import { ThemeProvider } from "next-themes";
+import localFont from 'next/font/local'
 
 const geistSans = DM_Sans({
   variable: "--font-geist-sans",
@@ -18,17 +20,30 @@ export const metadata: Metadata = {
   description: "Next.js boilerplate with Convex and authentication",
 };
 
+const myFont2 = localFont({
+  src: [
+    {
+      path: '../public/fonts/Matter-SemiBold.otf',
+      weight: '400',
+    },
+  ],
+  variable: '--font-archia',
+  display: 'swap',
+})
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${myFont2.variable} ${geistMono.variable} antialiased`}
       >
-        <ConvexClientProvider>{children}</ConvexClientProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <ConvexClientProvider>{children}</ConvexClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

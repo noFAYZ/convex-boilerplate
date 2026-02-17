@@ -6,7 +6,9 @@ import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileUpload } from "@/components/upload/file-upload";
+import { Loader2, Check } from "lucide-react";
 
 export default function ProfileSettingsPage() {
   const currentUser = useQuery(api.users.getCurrent);
@@ -18,7 +20,6 @@ export default function ProfileSettingsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
 
-  // Update form when user data loads
   if (currentUser && !name && currentUser.name) {
     setName(currentUser.name);
   }
@@ -48,14 +49,11 @@ export default function ProfileSettingsPage() {
     );
     if (!confirmed) return;
 
-    const doubleCheck = prompt(
-      'Type "DELETE" to confirm account deletion:'
-    );
+    const doubleCheck = prompt('Type "DELETE" to confirm account deletion:');
     if (doubleCheck !== "DELETE") return;
 
     try {
       await deleteAccount({});
-      // User will be logged out automatically
     } catch (error) {
       alert(error instanceof Error ? error.message : "Failed to delete account");
     }
@@ -64,28 +62,26 @@ export default function ProfileSettingsPage() {
   if (!currentUser) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-sm text-muted-foreground">Loading...</p>
-        </div>
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Profile Settings</h1>
+    <div className="max-w-2xl space-y-6">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-bold tracking-tight">Profile</h1>
         <p className="text-muted-foreground">
-          Manage your personal information and preferences
+          Manage your personal information
         </p>
       </div>
 
-      <div className="space-y-6">
-        {/* Profile Form */}
-        <div className="border rounded-lg p-6">
+      <Card>
+        <CardHeader className="pb-4">
+          <CardTitle className="text-base">Personal Information</CardTitle>
+        </CardHeader>
+        <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Avatar Upload */}
             <div className="space-y-2">
               <Label>Profile Picture</Label>
               <FileUpload
@@ -96,7 +92,6 @@ export default function ProfileSettingsPage() {
               />
             </div>
 
-            {/* Name */}
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
               <Input
@@ -105,10 +100,10 @@ export default function ProfileSettingsPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={isLoading}
+                className="h-11"
               />
             </div>
 
-            {/* Email (read-only) */}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -116,43 +111,48 @@ export default function ProfileSettingsPage() {
                 type="email"
                 value={currentUser.email || ""}
                 disabled
-                className="bg-muted"
+                className="h-11 bg-muted"
               />
               <p className="text-xs text-muted-foreground">
                 Email cannot be changed
               </p>
             </div>
 
-            {/* Save Button */}
-            <div className="flex gap-3">
+            <div className="flex items-center gap-3">
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Saving..." : "Save Changes"}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
               </Button>
               {isSaved && (
-                <span className="text-sm text-green-600 dark:text-green-400 flex items-center">
-                  ✓ Saved
+                <span className="text-sm text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                  <Check className="h-4 w-4" />
+                  Saved
                 </span>
               )}
             </div>
           </form>
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* Danger Zone */}
-        <div className="border border-destructive/50 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-destructive mb-2">
-            Danger Zone
-          </h2>
-          <p className="text-sm text-muted-foreground mb-4">
-            Once you delete your account, there is no going back. Please be certain.
+      <Card className="border-destructive/30">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-base text-destructive">Danger Zone</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Permanently delete your account and all associated data. This action cannot be undone.
           </p>
-          <Button
-            variant="destructive"
-            onClick={handleDeleteAccount}
-          >
+          <Button variant="destructive" onClick={handleDeleteAccount}>
             Delete Account
           </Button>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

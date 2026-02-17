@@ -3,6 +3,7 @@
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { UserPlus, UserMinus, UserCheck, ShieldCheck, FileText } from "lucide-react";
 
 interface ActivityFeedProps {
   organizationId?: Id<"organizations">;
@@ -19,74 +20,96 @@ export function ActivityFeed({ organizationId, limit = 20 }: ActivityFeedProps) 
 
   if (activity === undefined) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-sm text-muted-foreground">Loading activity...</p>
-        </div>
+      <div className="flex items-center justify-center py-12">
+        <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   if (activity.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
-        No activity yet
+      <div className="text-center py-16">
+        <FileText className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
+        <p className="text-sm text-muted-foreground">No activity yet</p>
       </div>
     );
   }
 
   const getActionIcon = (action: string) => {
-    if (action.includes("invited")) return "📧";
-    if (action.includes("joined")) return "👋";
-    if (action.includes("removed") || action.includes("left")) return "👋";
-    if (action.includes("role")) return "👤";
-    if (action.includes("updated")) return "✏️";
-    return "📝";
+    if (action.includes("invited")) return UserPlus;
+    if (action.includes("joined")) return UserCheck;
+    if (action.includes("removed") || action.includes("left")) return UserMinus;
+    if (action.includes("role")) return ShieldCheck;
+    return FileText;
   };
 
-  const getActionText = (action: string, metadata: Record<string, string | undefined> | undefined) => {
+  const getActionColor = (action: string) => {
+    if (action.includes("invited")) return "text-blue-500 bg-blue-500/10";
+    if (action.includes("joined")) return "text-emerald-500 bg-emerald-500/10";
+    if (action.includes("removed") || action.includes("left")) return "text-rose-500 bg-rose-500/10";
+    if (action.includes("role")) return "text-violet-500 bg-violet-500/10";
+    return "text-muted-foreground bg-muted";
+  };
+
+  const getActionText = (
+    action: string,
+    metadata: Record<string, string | undefined> | undefined
+  ) => {
     switch (action) {
       case "member.invited":
-        return `invited ${metadata?.email} as ${metadata?.role}`;
+        return `invited ${metadata?.email ?? "someone"} as ${metadata?.role ?? "member"}`;
       case "member.joined":
-        return `joined as ${metadata?.role}`;
+        return `joined as ${metadata?.role ?? "member"}`;
       case "member.removed":
-        return `removed ${metadata?.targetUserEmail}`;
+        return `removed ${metadata?.targetUserEmail ?? "a member"}`;
       case "member.left":
         return "left the organization";
       case "member.role_updated":
-        return `changed role from ${metadata?.oldRole} to ${metadata?.newRole}`;
+        return `changed role from ${metadata?.oldRole ?? "?"} to ${metadata?.newRole ?? "?"}`;
       default:
-        return action;
+        return action.replace(".", " ");
     }
   };
 
   return (
-    <div className="space-y-4">
-      {activity.map((log) => (
-        <div
-          key={log._id}
-          className="flex gap-3 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-        >
-          <div className="flex-shrink-0 text-2xl">{getActionIcon(log.action)}</div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm">
-              <span className="font-medium">{log.user?.name || "Someone"}</span>{" "}
-              {getActionText(log.action, log.metadata)}
-              {!organizationId && log.organization && (
+    <div className="space-y-2">
+      {activity.map((log) => {
+        const Icon = getActionIcon(log.action);
+        const colorClass = getActionColor(log.action);
+        const [iconColor, iconBg] = colorClass.split(" ");
+
+        return (
+          <div
+            key={log._id}
+            className="flex items-start gap-3 p-4 rounded-lg border hover:bg-muted/30 transition-colors"
+          >
+            <div className={`p-2 rounded-lg shrink-0 ${iconBg}`}>
+              <Icon className={`h-4 w-4 ${iconColor}`} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm">
+                <span className="font-medium">{log.user?.name ?? "Someone"}</span>{" "}
                 <span className="text-muted-foreground">
-                  {" "}
-                  in {log.organization.name}
+                  {getActionText(log.action, log.metadata as Record<string, string | undefined> | undefined)}
                 </span>
-              )}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {new Date(log.timestamp).toLocaleString()}
-            </p>
+                {!organizationId && "organization" in log && log.organization && (
+                  <span className="text-muted-foreground">
+                    {" "}in <span className="font-medium text-foreground">{(log.organization as { name: string }).name}</span>
+                  </span>
+                )}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {new Date(log.timestamp).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                })}
+              </p>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
