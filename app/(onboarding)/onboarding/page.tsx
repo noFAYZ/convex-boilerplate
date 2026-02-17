@@ -24,9 +24,9 @@ export default function OnboardingPage() {
   const [organizationName, setOrganizationName] = useState("");
 
   const currentUser = useQuery(api.users.getCurrent);
-  const onboardingStatus = useQuery(api.onboarding.getOnboardingStatus);
+  const onboardingStatus = useQuery(api.onboarding.getStatus);
   const completeProfile = useMutation(api.onboarding.completeProfile);
-  const completeOnboarding = useMutation(api.onboarding.completeOnboarding);
+  const completeOnboarding = useMutation(api.onboarding.complete);
 
   // Redirect if already onboarded
   useEffect(() => {

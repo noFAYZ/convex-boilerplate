@@ -1,27 +1,19 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 import { auth } from "./lib/auth";
-import { logActivity } from "./activity";
+import { inviteRoleValidator, roleValidator } from "./schema";
+import {
+  logActivity,
+  requireOrgMembership,
+  requireOrgAdmin,
+} from "./lib/helpers";
 
-// Get members of an organization
 export const list = query({
   args: { organizationId: v.id("organizations") },
   handler: async (ctx, args) => {
     const userId = await auth.requireUserId(ctx);
+    await requireOrgMembership(ctx, args.organizationId, userId);
 
-    // Verify membership
-    const membership = await ctx.db
-      .query("members")
-      .withIndex("by_org_and_user", (q) =>
-        q
-          .eq("organizationId", args.organizationId)
-          .eq("userId", userId as any)
-      )
-      .first();
-
-    if (!membership) throw new Error("Not a member of this organization");
-
-    // Get all members
     const members = await ctx.db
       .query("members")
       .withIndex("by_organization", (q) =>
@@ -29,7 +21,6 @@ export const list = query({
       )
       .collect();
 
-    // Fetch user details
     const membersWithUsers = await Promise.all(
       members.map(async (member) => {
         const user = await ctx.db.get(member.userId);
@@ -41,34 +32,19 @@ export const list = query({
   },
 });
 
-// Invite member to organization
 export const invite = mutation({
   args: {
     organizationId: v.id("organizations"),
     email: v.string(),
-    role: v.union(v.literal("admin"), v.literal("member")),
+    role: inviteRoleValidator,
   },
   handler: async (ctx, args) => {
     const userId = await auth.requireUserId(ctx);
+    await requireOrgAdmin(ctx, args.organizationId, userId);
 
-    // Check permissions (must be admin or owner)
-    const membership = await ctx.db
-      .query("members")
-      .withIndex("by_org_and_user", (q) =>
-        q
-          .eq("organizationId", args.organizationId)
-          .eq("userId", userId as any)
-      )
-      .first();
-
-    if (!membership || !["owner", "admin"].includes(membership.role)) {
-      throw new Error("Insufficient permissions");
-    }
-
-    // Check if user is already a member
     const existingUser = await ctx.db
       .query("users")
-      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .withIndex("email", (q) => q.eq("email", args.email))
       .first();
 
     if (existingUser) {
@@ -86,7 +62,6 @@ export const invite = mutation({
       }
     }
 
-    // Check if user already invited
     const existingInvite = await ctx.db
       .query("invitations")
       .withIndex("by_email", (q) => q.eq("email", args.email))
@@ -100,27 +75,23 @@ export const invite = mutation({
 
     if (existingInvite) throw new Error("User already invited");
 
-    // Generate invitation token
-    const token = `inv_${Date.now()}_${Math.random()
-      .toString(36)
-      .substring(7)}`;
-    const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
+    const token = `inv_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
 
     const invitationId = await ctx.db.insert("invitations", {
       organizationId: args.organizationId,
       email: args.email,
       role: args.role,
-      invitedBy: userId as any,
+      invitedBy: userId,
       token,
       expiresAt,
       status: "pending",
       createdAt: Date.now(),
     });
 
-    // Log activity
     await logActivity(ctx, {
       organizationId: args.organizationId,
-      userId: userId as any,
+      userId,
       action: "member.invited",
       entityType: "invitation",
       entityId: invitationId,
@@ -131,13 +102,11 @@ export const invite = mutation({
   },
 });
 
-// Accept invitation
 export const acceptInvitation = mutation({
   args: { token: v.string() },
   handler: async (ctx, args) => {
     const userId = await auth.requireUserId(ctx);
 
-    // Find invitation
     const invitation = await ctx.db
       .query("invitations")
       .withIndex("by_token", (q) => q.eq("token", args.token))
@@ -154,22 +123,19 @@ export const acceptInvitation = mutation({
       throw new Error("Invitation has expired");
     }
 
-    // Get current user
-    const user = await ctx.db.get(userId as any);
+    const user = await ctx.db.get(userId);
     if (!user) throw new Error("User not found");
 
-    // Verify email matches
     if (user.email !== invitation.email) {
       throw new Error("Invitation is for a different email address");
     }
 
-    // Check if already a member
     const existingMember = await ctx.db
       .query("members")
       .withIndex("by_org_and_user", (q) =>
         q
           .eq("organizationId", invitation.organizationId)
-          .eq("userId", userId as any)
+          .eq("userId", userId)
       )
       .first();
 
@@ -178,22 +144,19 @@ export const acceptInvitation = mutation({
       throw new Error("Already a member of this organization");
     }
 
-    // Add user to organization
     await ctx.db.insert("members", {
       organizationId: invitation.organizationId,
-      userId: userId as any,
+      userId,
       role: invitation.role,
       invitedBy: invitation.invitedBy,
       joinedAt: Date.now(),
     });
 
-    // Mark invitation as accepted
     await ctx.db.patch(invitation._id, { status: "accepted" });
 
-    // Log activity
     await logActivity(ctx, {
       organizationId: invitation.organizationId,
-      userId: userId as any,
+      userId,
       action: "member.joined",
       entityType: "member",
       entityId: user._id,
@@ -204,15 +167,10 @@ export const acceptInvitation = mutation({
   },
 });
 
-// Update member role
 export const updateRole = mutation({
   args: {
     memberId: v.id("members"),
-    role: v.union(
-      v.literal("owner"),
-      v.literal("admin"),
-      v.literal("member")
-    ),
+    role: roleValidator,
   },
   handler: async (ctx, args) => {
     const userId = await auth.requireUserId(ctx);
@@ -220,21 +178,16 @@ export const updateRole = mutation({
     const member = await ctx.db.get(args.memberId);
     if (!member) throw new Error("Member not found");
 
-    // Check permissions (only owner can change roles)
-    const userMembership = await ctx.db
-      .query("members")
-      .withIndex("by_org_and_user", (q) =>
-        q
-          .eq("organizationId", member.organizationId)
-          .eq("userId", userId as any)
-      )
-      .first();
+    const userMembership = await requireOrgMembership(
+      ctx,
+      member.organizationId,
+      userId
+    );
 
-    if (!userMembership || userMembership.role !== "owner") {
+    if (userMembership.role !== "owner") {
       throw new Error("Only owner can change roles");
     }
 
-    // Cannot change own role
     if (member.userId === userId) {
       throw new Error("Cannot change your own role");
     }
@@ -242,21 +195,23 @@ export const updateRole = mutation({
     const oldRole = member.role;
     await ctx.db.patch(args.memberId, { role: args.role });
 
-    // Log activity
     await logActivity(ctx, {
       organizationId: member.organizationId,
-      userId: userId as any,
+      userId,
       action: "member.role_updated",
       entityType: "member",
       entityId: args.memberId,
-      metadata: { oldRole, newRole: args.role, targetUserId: member.userId },
+      metadata: {
+        oldRole,
+        newRole: args.role,
+        targetUserId: member.userId,
+      },
     });
 
     return await ctx.db.get(args.memberId);
   },
 });
 
-// Remove member from organization
 export const remove = mutation({
   args: { memberId: v.id("members") },
   handler: async (ctx, args) => {
@@ -265,24 +220,18 @@ export const remove = mutation({
     const member = await ctx.db.get(args.memberId);
     if (!member) throw new Error("Member not found");
 
-    // Check permissions (owner or admin, or removing self)
-    const userMembership = await ctx.db
-      .query("members")
-      .withIndex("by_org_and_user", (q) =>
-        q
-          .eq("organizationId", member.organizationId)
-          .eq("userId", userId as any)
-      )
-      .first();
+    const userMembership = await requireOrgMembership(
+      ctx,
+      member.organizationId,
+      userId
+    );
 
     const canRemove =
-      userMembership &&
-      (["owner", "admin"].includes(userMembership.role) ||
-        member.userId === userId);
+      ["owner", "admin"].includes(userMembership.role) ||
+      member.userId === userId;
 
     if (!canRemove) throw new Error("Insufficient permissions");
 
-    // Cannot remove last owner
     if (member.role === "owner") {
       const owners = await ctx.db
         .query("members")
@@ -297,15 +246,12 @@ export const remove = mutation({
       }
     }
 
-    // Get user details for logging
     const targetUser = await ctx.db.get(member.userId);
-
     await ctx.db.delete(args.memberId);
 
-    // Log activity
     await logActivity(ctx, {
       organizationId: member.organizationId,
-      userId: userId as any,
+      userId,
       action: member.userId === userId ? "member.left" : "member.removed",
       entityType: "member",
       entityId: args.memberId,
@@ -318,25 +264,11 @@ export const remove = mutation({
   },
 });
 
-// Get pending invitations for organization
 export const listInvitations = query({
   args: { organizationId: v.id("organizations") },
   handler: async (ctx, args) => {
     const userId = await auth.requireUserId(ctx);
-
-    // Verify membership
-    const membership = await ctx.db
-      .query("members")
-      .withIndex("by_org_and_user", (q) =>
-        q
-          .eq("organizationId", args.organizationId)
-          .eq("userId", userId as any)
-      )
-      .first();
-
-    if (!membership || !["owner", "admin"].includes(membership.role)) {
-      throw new Error("Insufficient permissions");
-    }
+    await requireOrgAdmin(ctx, args.organizationId, userId);
 
     return await ctx.db
       .query("invitations")

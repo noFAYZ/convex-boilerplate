@@ -9,7 +9,7 @@ export function ProtectedLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const currentUser = useQuery(api.users.getCurrent);
-  const onboardingStatus = useQuery(api.onboarding.getOnboardingStatus);
+  const onboardingStatus = useQuery(api.onboarding.getStatus);
 
   useEffect(() => {
     // Wait for queries to resolve

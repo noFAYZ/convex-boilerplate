@@ -2,17 +2,15 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { auth } from "./lib/auth";
 
-// Check if user has completed onboarding
-export const getOnboardingStatus = query({
+export const getStatus = query({
   args: {},
   handler: async (ctx) => {
     const userId = await auth.getUserId(ctx);
     if (!userId) return null;
 
-    // Check if user has an organization
     const membership = await ctx.db
       .query("members")
-      .withIndex("by_user", (q) => q.eq("userId", userId as any))
+      .withIndex("by_user", (q) => q.eq("userId", userId))
       .first();
 
     return {
@@ -22,7 +20,6 @@ export const getOnboardingStatus = query({
   },
 });
 
-// Complete user profile step
 export const completeProfile = mutation({
   args: {
     name: v.string(),
@@ -31,18 +28,15 @@ export const completeProfile = mutation({
   handler: async (ctx, args) => {
     const userId = await auth.requireUserId(ctx);
 
-    // Update user profile
-    await ctx.db.patch(userId as any, {
-      name: args.name,
-      ...(args.image && { image: args.image }),
-    });
+    const updates: { name: string; image?: string } = { name: args.name };
+    if (args.image) updates.image = args.image;
 
+    await ctx.db.patch(userId, updates);
     return { success: true };
   },
 });
 
-// Create organization and complete onboarding
-export const completeOnboarding = mutation({
+export const complete = mutation({
   args: {
     organizationName: v.string(),
     organizationSlug: v.string(),
@@ -50,7 +44,6 @@ export const completeOnboarding = mutation({
   handler: async (ctx, args) => {
     const userId = await auth.requireUserId(ctx);
 
-    // Check if slug is already taken
     const existingOrg = await ctx.db
       .query("organizations")
       .withIndex("by_slug", (q) => q.eq("slug", args.organizationSlug))
@@ -60,21 +53,21 @@ export const completeOnboarding = mutation({
       throw new Error("Organization slug is already taken");
     }
 
-    // Create organization
+    const now = Date.now();
+
     const orgId = await ctx.db.insert("organizations", {
       name: args.organizationName,
       slug: args.organizationSlug,
-      createdBy: userId as any,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      createdBy: userId,
+      createdAt: now,
+      updatedAt: now,
     });
 
-    // Add user as owner
     await ctx.db.insert("members", {
       organizationId: orgId,
-      userId: userId as any,
+      userId,
       role: "owner",
-      joinedAt: Date.now(),
+      joinedAt: now,
     });
 
     return {
@@ -85,13 +78,9 @@ export const completeOnboarding = mutation({
   },
 });
 
-// Generate slug from organization name
-export const generateSlug = mutation({
-  args: {
-    name: v.string(),
-  },
+export const generateSlug = query({
+  args: { name: v.string() },
   handler: async (ctx, args) => {
-    // Convert to lowercase, replace spaces with hyphens, remove special chars
     let slug = args.name
       .toLowerCase()
       .replace(/\s+/g, "-")
@@ -99,13 +88,11 @@ export const generateSlug = mutation({
       .replace(/-+/g, "-")
       .replace(/^-|-$/g, "");
 
-    // Check if slug exists
     const existingOrg = await ctx.db
       .query("organizations")
       .withIndex("by_slug", (q) => q.eq("slug", slug))
       .first();
 
-    // If exists, add a random suffix
     if (existingOrg) {
       const randomSuffix = Math.random().toString(36).substring(2, 6);
       slug = `${slug}-${randomSuffix}`;

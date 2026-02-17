@@ -3,7 +3,6 @@ import { mutation, action, internalMutation, internalQuery } from "./_generated/
 import { internal } from "./_generated/api";
 import { auth } from "./lib/auth";
 
-// Change password (for authenticated users) - uses action for Node.js API access
 export const changePassword = action({
   args: {
     currentPassword: v.string(),
@@ -19,53 +18,33 @@ export const changePassword = action({
       throw new Error("New password must be at least 8 characters");
     }
 
-    // Get user and auth account info
     const authData = await ctx.runQuery(internal.password.getAuthData, {
-      userId: userId as any,
+      userId,
     });
 
-    if (!authData || !authData.user || !authData.authAccount) {
+    if (!authData?.user || !authData?.authAccount) {
       throw new Error("User or authentication data not found");
     }
 
-    // Verify current password using bcrypt or crypto
-    // Note: @convex-dev/auth Password provider uses its own hashing
-    // For simplicity, we'll implement a basic verification
-    // In production, you'd match the exact hashing used by your auth provider
-
-    // For @convex-dev/auth Password provider, it uses a combination of methods
-    // We'll implement a compatible verification approach
     try {
-      // Attempt to verify the password
-      // The Password provider in Convex Auth handles password hashing internally
-      // We need to check if current password matches the stored hash
-
-      // Since we can't access the exact hashing function from @convex-dev/auth,
-      // we'll use a simpler approach: hash the new password and update it
-      // The verification of the current password would ideally be done through
-      // a re-authentication flow in a production app
-
-      // For this implementation, we'll hash the new password and update it
       const crypto = await import("crypto");
       const hashedPassword = crypto
         .createHash("sha256")
-        .update(args.newPassword + (authData.user.email || ""))
+        .update(args.newPassword + (authData.user.email ?? ""))
         .digest("hex");
 
-      // Update password via internal mutation
       await ctx.runMutation(internal.password.updatePasswordHash, {
         authAccountId: authData.authAccount._id,
         newPasswordHash: hashedPassword,
       });
 
       return { success: true };
-    } catch (error) {
+    } catch {
       throw new Error("Failed to change password");
     }
   },
 });
 
-// Internal query to get auth data
 export const getAuthData = internalQuery({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
@@ -78,14 +57,10 @@ export const getAuthData = internalQuery({
       )
       .first();
 
-    return {
-      user,
-      authAccount,
-    };
+    return { user, authAccount };
   },
 });
 
-// Internal mutation to update password hash
 export const updatePasswordHash = internalMutation({
   args: {
     authAccountId: v.id("authAccounts"),
@@ -99,16 +74,12 @@ export const updatePasswordHash = internalMutation({
   },
 });
 
-// Request password reset (for non-authenticated users)
 export const requestPasswordReset = mutation({
-  args: {
-    email: v.string(),
-  },
+  args: { email: v.string() },
   handler: async (ctx, args) => {
-    // Find user by email
     const user = await ctx.db
       .query("users")
-      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .withIndex("email", (q) => q.eq("email", args.email))
       .first();
 
     // Always return success for security (don't reveal if email exists)
@@ -116,18 +87,7 @@ export const requestPasswordReset = mutation({
       return { success: true };
     }
 
-    // Generate reset token
-    const token = `reset_${Date.now()}_${Math.random()
-      .toString(36)
-      .substring(7)}`;
-    const expiresAt = Date.now() + 60 * 60 * 1000; // 1 hour
-
-    // Store reset token (you'd need to add a passwordResets table to schema)
-    // For now, this is a placeholder
-
-    // TODO: Send email with reset link
-    // TODO: Store reset token in database
-
+    // TODO: Implement password reset token storage and email sending
     return { success: true };
   },
 });

@@ -12,8 +12,8 @@ interface ActivityFeedProps {
 export function ActivityFeed({ organizationId, limit = 20 }: ActivityFeedProps) {
   const activity = useQuery(
     organizationId
-      ? api.activity.getOrganizationActivity
-      : api.activity.getRecentActivity,
+      ? api.activity.list
+      : api.activity.getRecent,
     organizationId ? { organizationId, limit } : { limit }
   );
 
@@ -45,7 +45,7 @@ export function ActivityFeed({ organizationId, limit = 20 }: ActivityFeedProps) 
     return "📝";
   };
 
-  const getActionText = (action: string, metadata: any) => {
+  const getActionText = (action: string, metadata: Record<string, string | undefined> | undefined) => {
     switch (action) {
       case "member.invited":
         return `invited ${metadata?.email} as ${metadata?.role}`;

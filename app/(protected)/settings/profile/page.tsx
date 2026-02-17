@@ -10,8 +10,8 @@ import { FileUpload } from "@/components/upload/file-upload";
 
 export default function ProfileSettingsPage() {
   const currentUser = useQuery(api.users.getCurrent);
-  const updateProfile = useMutation(api.profile.updateProfile);
-  const deleteAccount = useMutation(api.profile.deleteAccount);
+  const updateProfile = useMutation(api.users.update);
+  const deleteAccount = useMutation(api.users.deleteAccount);
 
   const [name, setName] = useState(currentUser?.name || "");
   const [image, setImage] = useState(currentUser?.image || "");
