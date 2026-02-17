@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 const myFont2 = localFont({
   src: [
     {
-      path: '../public/fonts/Matter-SemiBold.otf',
+      path: '../public/fonts/Matter-Medium.otf',
       weight: '400',
     },
   ],
@@ -39,7 +39,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${myFont2.variable} ${geistMono.variable} antialiased`}
+        className={`${myFont2.variable}  antialiased`}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ConvexClientProvider>{children}</ConvexClientProvider>
