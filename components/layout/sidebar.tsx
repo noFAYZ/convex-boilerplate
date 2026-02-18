@@ -23,14 +23,37 @@ interface NavItem {
   name: string;
   href: string;
   icon: IconSvgElement;
+  badge?: string;
+  isNew?: boolean;
 }
 
-const navigation: NavItem[] = [
-  { name: "Dashboard", href: "/dashboard", icon: DashboardSquare01Icon },
-  { name: "Team", href: "/team", icon: UserGroupIcon },
-  { name: "Activity", href: "/activity", icon: Activity01Icon },
-  { name: "Settings", href: "/settings/profile", icon: Settings01Icon },
-];
+interface NavSection {
+  title: string;
+  items: NavItem[];
+}
+
+// Hoist static data outside component to prevent recreating on every render
+const NAVIGATION_SECTIONS: NavSection[] = [
+  {
+    title: "Main",
+    items: [
+      { name: "Dashboard", href: "/dashboard", icon: DashboardSquare01Icon },
+      { name: "Activity", href: "/activity", icon: Activity01Icon },
+    ],
+  },
+  {
+    title: "Manage",
+    items: [
+      { name: "Team", href: "/team", icon: UserGroupIcon, badge: "New" },
+    ],
+  },
+  {
+    title: "Settings",
+    items: [
+      { name: "Profile", href: "/settings/profile", icon: Settings01Icon },
+    ],
+  },
+] as const;
 
 interface SidebarNavLinkProps {
   item: NavItem;
@@ -41,113 +64,158 @@ interface SidebarNavLinkProps {
 const SidebarNavLink = memo<SidebarNavLinkProps>(
   ({ item, isActive, onClick }) => {
     return (
-      <Link
-        href={item.href}
-        onClick={onClick}
+      <Button
+        asChild
+        variant={isActive ? `outline` : "ghost"}
         className={cn(
-          "flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] font-medium transition-colors duration-100",
-          isActive
-            ? "bg-primary/10 text-primary"
-            : "text-muted-foreground hover:bg-accent hover:text-foreground"
-        )}
+            "w-full justify-start px-3 py-1.5 text-sm h-auto font-medium transition-all duration-100 rounded group",
+            isActive && "bg-background"
+          )}
       >
-        <HugeiconsIcon icon={item.icon} className="h-4 w-4 shrink-0" />
-        <span>{item.name}</span>
-      </Link>
+        <Link
+          href={item.href}
+          onClick={onClick}
+          className="flex items-center gap-3"
+        >
+          <HugeiconsIcon
+            icon={item.icon}
+            className={cn(
+              "h-4 w-4 shrink-0 transition-transform duration-100",
+              isActive && "group-hover:scale-110"
+            )}
+          />
+          <span className="flex-1 truncate">{item.name}</span>
+
+          {isActive && (
+            <div
+              className="h-1 w-1 rounded-full ml-auto"
+              style={{ backgroundColor: `var(--primary)` }}
+            />
+          )}
+
+          {item.badge && (
+            <span
+              className="ml-auto inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
+              style={{
+                backgroundColor: `color-mix(in srgb, var(--primary) 20%, transparent)`,
+                color: `var(--primary)`,
+              }}
+            >
+              {item.badge}
+            </span>
+          )}
+        </Link>
+      </Button>
     );
   }
 );
 
 SidebarNavLink.displayName = "SidebarNavLink";
 
+interface SidebarSectionProps {
+  section: NavSection;
+  isActiveMap: Record<string, boolean>;
+}
+
+const SidebarSection = memo<SidebarSectionProps>(
+  ({ section, isActiveMap }) => {
+    return (
+      <div className="space-y-1">
+        <h3
+          className="px-2 py-2 text-[11px] font-semibold tracking-wider uppercase"
+          style={{ color: `var(--accent-foreground)` }}
+        >
+          {section.title}
+        </h3>
+        <div className="space-y-1 px-1">
+          {section.items.map((item) => (
+            <SidebarNavLink
+              key={item.href}
+              item={item}
+              isActive={isActiveMap[item.href] ?? false}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+);
+
+SidebarSection.displayName = "SidebarSection";
+
 export const Sidebar = memo(() => {
   const pathname = usePathname();
   const { isOpen, closeSidebar } = useSidebar();
 
-  const activeStates = useMemo(
-    () =>
-      navigation.map((item) => ({
-        ...item,
-        isActive:
+  const isActiveMap = useMemo(() => {
+    const map: Record<string, boolean> = {};
+    NAVIGATION_SECTIONS.forEach((section) => {
+      section.items.forEach((item) => {
+        map[item.href] =
           pathname === item.href ||
-          (item.href !== "/dashboard" && pathname?.startsWith(item.href)),
-      })),
-    [pathname]
-  );
+          (item.href !== "/dashboard" && pathname?.startsWith(item.href));
+      });
+    });
+    return map;
+  }, [pathname]);
 
   return (
     <>
       {/* Mobile overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 lg:hidden animate-in fade-in duration-200"
+          className="fixed inset-0 backdrop-blur-sm z-40 lg:hidden animate-in fade-in duration-150"
           onClick={closeSidebar}
           aria-hidden="true"
+          style={{ backgroundColor: `color-mix(in srgb, var(--foreground) 50%, transparent)` }}
         />
       )}
 
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-50 h-full w-[240px] bg-sidebar border-r border-sidebar-border transition-transform duration-150 ease-out lg:translate-x-0 lg:static lg:z-0",
+          "fixed left-0 top-0 z-50 h-full w-70 bg-sidebar   transition-transform duration-200 ease-out lg:translate-x-0 lg:static lg:z-0 flex flex-col",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
+       
       >
-        <div className="flex h-full flex-col">
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 h-14 border-b border-sidebar-border">
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-2 group"
-              onClick={closeSidebar}
-            >
-              <div className="w-6 h-6 rounded-md bg-foreground flex items-center justify-center text-background font-semibold text-[9px]">
-                CB
-              </div>
-              <span className="text-[13px] font-semibold tracking-tight">
-                Convex Boilerplate
-              </span>
-            </Link>
-            <div className="flex items-center gap-0.5">
-              <ThemeSwitcher />
-              <Button
-                variant="ghost"
-                size="icon"
-                className="lg:hidden h-7 w-7"
-                onClick={closeSidebar}
-                aria-label="Close sidebar"
-              >
-                <HugeiconsIcon icon={Cancel01Icon} className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Organization Switcher */}
-          <div className="px-3 py-3 border-b border-sidebar-border">
-            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider px-2.5 mb-1.5">
-              Organization
-            </p>
+        {/* Header with Organization Switcher */}
+        <div className="px-3 py-4 flex items-center justify-between gap-2">
+          <div className="flex-1 min-w-0">
             <OrgSwitcher />
           </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 px-3 py-3 overflow-y-auto">
-            <div className="space-y-0.5">
-              {activeStates.map((item) => (
-                <SidebarNavLink
-                  key={item.href}
-                  item={item}
-                  isActive={item.isActive}
-                  onClick={closeSidebar}
-                />
-              ))}
-            </div>
-          </nav>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden h-7 w-7"
+            onClick={closeSidebar}
+            aria-label="Close sidebar"
+          >
+            <HugeiconsIcon icon={Cancel01Icon} className="h-4 w-4" />
+          </Button>
+        </div>
 
-          {/* Footer */}
-          <div className="border-t border-sidebar-border px-3 py-3">
-            <AuthButton />
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-6">
+          {NAVIGATION_SECTIONS.map((section) => (
+            <SidebarSection
+              key={section.title}
+              section={section}
+              isActiveMap={isActiveMap}
+            />
+          ))}
+        </nav>
+
+        {/* Footer */}
+        <div className="px-3 py-4 space-y-3"  >
+          <div className="flex items-center justify-between px-2">
+            <span className="text-xs font-medium" style={{ color: `var(--sidebar-foreground)` }}>
+              Theme
+            </span>
+            <ThemeSwitcher />
           </div>
+          <AuthButton isCollapsed={false} />
         </div>
       </aside>
     </>
@@ -163,11 +231,11 @@ export const SidebarToggle = memo(() => {
     <Button
       variant="ghost"
       size="icon"
-      className="lg:hidden h-8 w-8"
+      className="lg:hidden h-9 w-9 hover:bg-sidebar-accent/40"
       onClick={toggleSidebar}
       aria-label="Toggle sidebar"
     >
-      <HugeiconsIcon icon={Menu01Icon} className="h-4 w-4" />
+      <HugeiconsIcon icon={Menu01Icon} className="h-5 w-5" />
     </Button>
   );
 });

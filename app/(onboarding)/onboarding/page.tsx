@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { handleMutationError, handleMutationSuccess } from "@/lib/error-handler";
 import { OnboardingProgress } from "@/components/onboarding/onboarding-progress";
 import { WelcomeStep } from "@/components/onboarding/welcome-step";
 import { ProfileStep } from "@/components/onboarding/profile-step";
@@ -49,10 +50,10 @@ export default function OnboardingPage() {
     setIsLoading(true);
     try {
       await completeProfile(data);
+      handleMutationSuccess("Profile updated successfully");
       setCurrentStep(3);
     } catch (error) {
-      console.error("Failed to update profile:", error);
-      alert("Failed to update profile. Please try again.");
+      handleMutationError(error);
     } finally {
       setIsLoading(false);
     }
@@ -65,13 +66,11 @@ export default function OnboardingPage() {
     setIsLoading(true);
     try {
       await completeOnboarding(data);
+      handleMutationSuccess("Organization created successfully");
       setOrganizationName(data.organizationName);
       setCurrentStep(4);
     } catch (error) {
-      console.error("Failed to create organization:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to create organization";
-      alert(errorMessage);
+      handleMutationError(error);
     } finally {
       setIsLoading(false);
     }

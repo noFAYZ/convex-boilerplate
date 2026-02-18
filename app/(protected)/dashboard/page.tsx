@@ -77,18 +77,19 @@ export default function DashboardPage() {
       <div className="grid gap-3 sm:grid-cols-3">
         {stats.map((stat) => (
           <Link key={stat.title} href={stat.href}>
-            <Card className="group hover:shadow-md transition-shadow duration-200 cursor-pointer">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <HugeiconsIcon icon={stat.icon} className="h-4 w-4 text-muted-foreground" />
+            <Card className="group flex-row items-center  hover:bg-accent transition-shadow duration-100 cursor-pointer">
+         
+                <div className="flex items-center justify-between ">
+                  <HugeiconsIcon icon={stat.icon} className="h-6 w-6 text-muted-foreground" />
                 </div>
                 <div className="text-2xl font-bold tabular-nums">
                   {stat.value}
-                </div>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                 <p className="text-xs text-muted-foreground  subpixel-antialiased">
                   {stat.title}
-                </p>
-              </CardContent>
+                </p>  
+                </div>
+               
+    
             </Card>
           </Link>
         ))}

@@ -26,7 +26,7 @@ export const list = query({
         return {
           ...log,
           user: user
-            ? { id: user._id, name: user.name, email: user.email }
+            ? { id: user._id, name: user.name, email: user.email, image: user.image }
             : null,
         };
       })
@@ -74,7 +74,7 @@ export const getRecent = query({
         return {
           ...log,
           user: user
-            ? { id: user._id, name: user.name, email: user.email }
+            ? { id: user._id, name: user.name, email: user.email, image: user.image }
             : null,
           organization: organization
             ? { id: organization._id, name: organization.name }

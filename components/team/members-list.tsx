@@ -3,8 +3,11 @@
 import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { normalizeImageUrl } from "@/lib/normalize-image-url";
+import { handleMutationError, handleMutationSuccess } from "@/lib/error-handler";
 import { Button } from "@/components/ui/button";
 import { Id } from "@/convex/_generated/dataModel";
+import { Badge } from "../ui/badge";
 
 interface Member {
   _id: Id<"members">;
@@ -46,9 +49,10 @@ export function MembersList({
     setLoadingMemberId(memberId);
     try {
       await updateRole({ memberId, role: newRole });
+      handleMutationSuccess("Role updated successfully");
       onUpdate?.();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Failed to update role");
+      handleMutationError(error);
     } finally {
       setLoadingMemberId(null);
     }
@@ -63,9 +67,10 @@ export function MembersList({
     setLoadingMemberId(memberId);
     try {
       await removeMember({ memberId });
+      handleMutationSuccess("Member removed successfully");
       onUpdate?.();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Failed to remove member");
+      handleMutationError(error);
     } finally {
       setLoadingMemberId(null);
     }
@@ -82,14 +87,14 @@ export function MembersList({
         return (
           <div
             key={member._id}
-            className="flex items-center justify-between p-4 border rounded-lg"
+            className="flex items-center justify-between  hover:bg-background px-3 py-2 rounded-lg  "
           >
             <div className="flex items-center gap-3">
               {/* Avatar */}
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                 {member.user?.image ? (
                   <img
-                    src={member.user.image}
+                    src={normalizeImageUrl(member.user.image) || ""}
                     alt={member.user.name || ""}
                     className="w-full h-full rounded-full object-cover"
                   />
@@ -135,15 +140,15 @@ export function MembersList({
                   <option value="member">Member</option>
                 </select>
               ) : (
-                <span className="px-3 py-1 bg-muted rounded-md text-sm capitalize">
+                <Badge variant={'secondary'} className="text-white rounded-md text-xs capitalize">
                   {member.role}
-                </span>
+                </Badge>
               )}
 
               {/* Remove Button */}
               {(canManage || isCurrentUser) && (
                 <Button
-                  variant="outline"
+                  variant={isCurrentUser ? "default" : "destructive"}
                   size="sm"
                   onClick={() => handleRemove(member._id, member.user?.name)}
                   disabled={isLoading}

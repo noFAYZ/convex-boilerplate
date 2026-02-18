@@ -3,9 +3,17 @@
 import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { handleMutationError, handleMutationSuccess } from "@/lib/error-handler";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Id } from "@/convex/_generated/dataModel";
 
 interface InviteMemberModalProps {
@@ -22,13 +30,11 @@ export function InviteMemberModal({
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"admin" | "member">("member");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const inviteMember = useMutation(api.members.invite);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
     setIsLoading(true);
 
     try {
@@ -37,10 +43,11 @@ export function InviteMemberModal({
         email: email.toLowerCase().trim(),
         role,
       });
+      handleMutationSuccess("Invitation sent successfully");
       onSuccess?.();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to invite member");
+      handleMutationError(err);
     } finally {
       setIsLoading(false);
     }
@@ -60,18 +67,13 @@ export function InviteMemberModal({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
-              {error}
-            </div>
-          )}
-
           <div className="space-y-2">
             <Label htmlFor="email">Email Address</Label>
             <Input
               id="email"
               type="email"
               placeholder="colleague@example.com"
+              className="h-10"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -80,18 +82,17 @@ export function InviteMemberModal({
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 w-full">
             <Label htmlFor="role">Role</Label>
-            <select
-              id="role"
-              value={role}
-              onChange={(e) => setRole(e.target.value as "admin" | "member")}
-              className="w-full px-3 py-2 border rounded-md bg-background"
-              disabled={isLoading}
-            >
-              <option value="member">Member</option>
-              <option value="admin">Admin</option>
-            </select>
+            <Select value={role} onValueChange={(value) => setRole(value as "admin" | "member")} disabled={isLoading} >
+              <SelectTrigger id="role" className={'w-full h-10 text-sm'}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="member">Member</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
+              </SelectContent>
+            </Select>
             <p className="text-xs text-muted-foreground">
               {role === "admin"
                 ? "Can manage members and settings"

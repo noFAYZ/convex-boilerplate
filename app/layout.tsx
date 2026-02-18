@@ -3,6 +3,7 @@ import { Geist, Geist_Mono,DM_Sans } from "next/font/google";
 import "./globals.css";
 import { ConvexClientProvider } from "@/components/providers/convex-provider";
 import { ThemeProvider } from "next-themes";
+import { Toaster } from "@/components/ui/toaster";
 import localFont from 'next/font/local'
 
 const geistSans = DM_Sans({
@@ -23,8 +24,19 @@ export const metadata: Metadata = {
 const myFont2 = localFont({
   src: [
     {
-      path: '../public/fonts/Matter-Medium.otf',
-      weight: '400',
+      path: '../public/fonts/matter/Matter-Regular.otf',
+      weight: '500',
+    },
+  ],
+  variable: '--font-archia',
+  display: 'swap',
+})
+
+const myFont4 = localFont({
+  src: [
+    {
+      path: '../public/fonts/arch/archia-regular-webfont.ttf',
+      weight: '500',
     },
   ],
   variable: '--font-archia',
@@ -39,10 +51,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${myFont2.variable}  antialiased`}
+        className={`${myFont4.className}  antialiased`}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ConvexClientProvider>{children}</ConvexClientProvider>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

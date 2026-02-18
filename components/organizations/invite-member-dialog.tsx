@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { handleMutationError, handleMutationSuccess } from "@/lib/error-handler";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -36,23 +37,20 @@ export function InviteMemberDialog({
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"admin" | "member">("member");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const invite = useMutation(api.members.invite);
 
   const handleInvite = async () => {
-    setError("");
     setLoading(true);
 
     try {
       await invite({ organizationId, email, role });
+      handleMutationSuccess("Invitation sent successfully");
       setOpen(false);
       setEmail("");
       setRole("member");
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to send invitation"
-      );
+      handleMutationError(err);
     } finally {
       setLoading(false);
     }
@@ -70,12 +68,6 @@ export function InviteMemberDialog({
         </AlertDialogHeader>
 
         <div className="space-y-4 py-4">
-          {error && (
-            <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
-              {error}
-            </div>
-          )}
-
           <div className="space-y-2">
             <Label htmlFor="email">Email Address</Label>
             <Input

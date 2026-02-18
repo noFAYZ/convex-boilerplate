@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileUpload } from "@/components/upload/file-upload";
+import { handleMutationError, handleMutationSuccess } from "@/lib/error-handler";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Loading01Icon, Tick01Icon } from "@hugeicons/core-free-icons";
+import { Loading01Icon } from "@hugeicons/core-free-icons";
 
 export default function ProfileSettingsPage() {
   const currentUser = useQuery(api.users.getCurrent);
@@ -19,7 +20,6 @@ export default function ProfileSettingsPage() {
   const [name, setName] = useState(currentUser?.name || "");
   const [image, setImage] = useState(currentUser?.image || "");
   const [isLoading, setIsLoading] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
 
   if (currentUser && !name && currentUser.name) {
     setName(currentUser.name);
@@ -31,14 +31,12 @@ export default function ProfileSettingsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setIsSaved(false);
 
     try {
       await updateProfile({ name, image });
-      setIsSaved(true);
-      setTimeout(() => setIsSaved(false), 3000);
+      handleMutationSuccess("Profile updated successfully");
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Failed to update profile");
+      handleMutationError(error);
     } finally {
       setIsLoading(false);
     }
@@ -55,8 +53,9 @@ export default function ProfileSettingsPage() {
 
     try {
       await deleteAccount({});
+      handleMutationSuccess("Account deleted successfully");
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Failed to delete account");
+      handleMutationError(error);
     }
   };
 
@@ -70,12 +69,7 @@ export default function ProfileSettingsPage() {
 
   return (
     <div className="max-w-2xl space-y-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight">Profile</h1>
-        <p className="text-sm text-muted-foreground">
-          Manage your personal information
-        </p>
-      </div>
+ 
 
       <Card>
         <CardHeader className="pb-3">
@@ -119,24 +113,16 @@ export default function ProfileSettingsPage() {
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <HugeiconsIcon icon={Loading01Icon} className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  "Save Changes"
-                )}
-              </Button>
-              {isSaved && (
-                <span className="text-sm text-muted-foreground flex items-center gap-1">
-                  <HugeiconsIcon icon={Tick01Icon} className="h-3.5 w-3.5" />
-                  Saved
-                </span>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <HugeiconsIcon icon={Loading01Icon} className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save Changes"
               )}
-            </div>
+            </Button>
           </form>
         </CardContent>
       </Card>

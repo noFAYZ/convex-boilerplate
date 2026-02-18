@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CheckCircle2, AlertCircle, Eye, EyeOff, Check } from "lucide-react";
+import { handleMutationError, handleMutationSuccess } from "@/lib/error-handler";
+import { AlertCircle, Eye, EyeOff, Check } from "lucide-react";
 
 export default function PasswordSettingsPage() {
   const changePassword = useAction(api.password.changePassword);
@@ -16,8 +16,6 @@ export default function PasswordSettingsPage() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -32,16 +30,14 @@ export default function PasswordSettingsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setSuccess(false);
 
     if (newPassword.length < 8) {
-      setError("Password must be at least 8 characters");
+      handleMutationError(new Error("Password must be at least 8 characters"));
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match");
+      handleMutationError(new Error("Passwords do not match"));
       return;
     }
 
@@ -50,13 +46,12 @@ export default function PasswordSettingsPage() {
     try {
       await changePassword({ currentPassword, newPassword });
 
-      setSuccess(true);
+      handleMutationSuccess("Password changed successfully");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      setTimeout(() => setSuccess(false), 5000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to change password");
+      handleMutationError(err);
     } finally {
       setIsLoading(false);
     }
@@ -81,20 +76,6 @@ export default function PasswordSettingsPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-5">
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            {success && (
-              <Alert>
-                <CheckCircle2 className="h-4 w-4" />
-                <AlertDescription>Password changed successfully!</AlertDescription>
-              </Alert>
-            )}
-
             <div className="space-y-2">
               <Label htmlFor="currentPassword">Current Password</Label>
               <div className="relative">
@@ -122,7 +103,7 @@ export default function PasswordSettingsPage() {
               </div>
             </div>
 
-            <div className="h-px bg-border" />
+            <div className="h-px bg-border/20" />
 
             <div className="space-y-2">
               <Label htmlFor="newPassword">New Password</Label>

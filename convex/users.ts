@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 import { auth } from "./lib/auth";
+import { logActivity } from "./lib/helpers";
 
 export const getCurrent = query({
   args: {},
@@ -31,6 +32,32 @@ export const update = mutation({
     if (args.image !== undefined) updates.image = args.image;
 
     await ctx.db.patch(userId, updates);
+
+    // Log activity in all user's organizations
+    const memberships = await ctx.db
+      .query("members")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+
+    for (const membership of memberships) {
+      const action = args.image !== undefined && args.name !== undefined
+        ? "profile_updated"
+        : args.image !== undefined
+        ? "avatar_updated"
+        : "profile_updated";
+
+      await logActivity(ctx, {
+        organizationId: membership.organizationId,
+        userId,
+        action,
+        entityType: "user",
+        entityId: userId.toString(),
+        metadata: {
+          email: (await ctx.db.get(userId))?.email,
+        },
+      });
+    }
+
     return await ctx.db.get(userId);
   },
 });

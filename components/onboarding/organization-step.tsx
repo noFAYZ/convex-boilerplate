@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { handleMutationError, handleMutationSuccess } from "@/lib/error-handler";
 
 interface OrganizationStepProps {
   onNext: (data: { organizationName: string; organizationSlug: string }) => void;
@@ -53,8 +54,9 @@ export function OrganizationStep({
         const result = await generateSlug({ name: organizationName });
         setOrganizationSlug(result.slug);
         setSlugTouched(true);
+        handleMutationSuccess("Slug generated successfully");
       } catch (error) {
-        console.error("Failed to generate slug:", error);
+        handleMutationError(error);
       }
     }
   };

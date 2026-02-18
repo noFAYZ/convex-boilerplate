@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { handleMutationError, handleMutationSuccess } from "@/lib/error-handler";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Trash02Icon, Plus01Icon } from "@hugeicons/core-free-icons";
+import { Trash, Plus } from "@hugeicons/core-free-icons";
 
 const ORG_COLORS = [
   { bg: "bg-orange-100 dark:bg-orange-950", text: "text-orange-700 dark:text-orange-300" },
@@ -182,15 +182,15 @@ export default function OrganizationSettingsPage() {
     <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
       {/* LEFT PANEL — Organizations List */}
       <div className="space-y-4">
-        <div className="space-y-2.5">
-          <h2 className="text-sm font-semibold">Organizations</h2>
+        <div className="space-y-2.5 flex justify-end">
+                
           <Button
-            variant="ghost"
+       
             size="sm"
             onClick={() => setShowCreateForm(!showCreateForm)}
-            className="w-full justify-start text-xs h-8 gap-2 text-muted-foreground"
+            className=" justify-center text-xs   gap-2  "
           >
-            <HugeiconsIcon icon={Plus01Icon} className="h-3.5 w-3.5" />
+            <HugeiconsIcon icon={Plus} className="h-4 w-4              " />
             New
           </Button>
         </div>
@@ -239,14 +239,11 @@ export default function OrganizationSettingsPage() {
             const color = getOrgColor(org.name);
 
             return (
-              <button
+              <div
                 key={org._id}
                 onClick={() => setActiveOrgId(org._id)}
-                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-all ${
-                  isActive
-                    ? `${color.bg} ${color.text} border-l-2 border-l-foreground`
-                    : "hover:bg-muted/50 text-foreground"
-                }`}
+            
+                className={`w-full flex gap-2  py-2 rounded-md text-xs transition-all `}
               >
                 <OrgMonogram name={org.name} size="sm" />
                 <div className="flex-1 min-w-0 text-left">
@@ -254,7 +251,7 @@ export default function OrganizationSettingsPage() {
                   <div className="text-[10px] text-muted-foreground truncate">/{org.slug}</div>
                 </div>
                 <RoleBadge role={org.role} />
-              </button>
+              </div>
             );
           })}
         </div>
@@ -310,7 +307,7 @@ export default function OrganizationSettingsPage() {
                 disabled={deleting === activeOrg._id}
                 className="gap-2"
               >
-                <HugeiconsIcon icon={Trash02Icon} className="h-3.5 w-3.5" />
+                <HugeiconsIcon icon={Trash} className="h-3.5 w-3.5" />
                 Delete Organization
               </Button>
             </div>

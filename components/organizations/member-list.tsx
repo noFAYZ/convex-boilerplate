@@ -3,6 +3,8 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { normalizeImageUrl } from "@/lib/normalize-image-url";
+import { handleMutationError, handleMutationSuccess } from "@/lib/error-handler";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -46,7 +48,7 @@ export function MemberList({ organizationId }: MemberListProps) {
               <div className="flex items-center gap-4">
                 {member.user?.image && (
                   <img
-                    src={member.user.image}
+                    src={normalizeImageUrl(member.user.image) || ""}
                     alt={member.user.name}
                     className="size-10 rounded-full"
                   />
@@ -62,12 +64,17 @@ export function MemberList({ organizationId }: MemberListProps) {
               <div className="flex items-center gap-2">
                 <Select
                   value={member.role}
-                  onValueChange={(role) =>
-                    updateRole({
-                      memberId: member._id,
-                      role: role as "owner" | "admin" | "member",
-                    })
-                  }
+                  onValueChange={async (role) => {
+                    try {
+                      await updateRole({
+                        memberId: member._id,
+                        role: role as "owner" | "admin" | "member",
+                      });
+                      handleMutationSuccess("Role updated successfully");
+                    } catch (error) {
+                      handleMutationError(error);
+                    }
+                  }}
                 >
                   <SelectTrigger className="w-32">
                     <SelectValue />
@@ -82,7 +89,14 @@ export function MemberList({ organizationId }: MemberListProps) {
                 <Button
                   variant="destructive"
                   size="sm"
-                  onClick={() => removeMember({ memberId: member._id })}
+                  onClick={async () => {
+                    try {
+                      await removeMember({ memberId: member._id });
+                      handleMutationSuccess("Member removed successfully");
+                    } catch (error) {
+                      handleMutationError(error);
+                    }
+                  }}
                 >
                   Remove
                 </Button>

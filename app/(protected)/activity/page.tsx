@@ -1,6 +1,6 @@
 "use client";
 
-import { ActivityFeed } from "@/components/activity/activity-feed";
+import { ActivityTimeline } from "@/components/activity/activity-timeline";
 
 export default function ActivityPage() {
   return (
@@ -8,11 +8,13 @@ export default function ActivityPage() {
       <div className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight">Activity Log</h1>
         <p className="text-sm text-muted-foreground">
-          Recent activity across all your organizations
+          Monitor all activity across your organizations in real-time
         </p>
       </div>
 
-      <ActivityFeed limit={50} />
+      <div className="bg-card border rounded-lg p-6">
+        <ActivityTimeline limit={100} />
+      </div>
     </div>
   );
 }

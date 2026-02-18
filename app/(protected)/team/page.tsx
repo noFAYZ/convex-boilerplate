@@ -44,9 +44,9 @@ export default function TeamPage() {
     <div className="max-w-4xl space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight">Team</h1>
-          <p className="text-sm text-muted-foreground">
+        <div className="space-y-0.5">
+          <h1 className="text-xl font-bold tracking-tight">Team</h1>
+          <p className="text-xs text-muted-foreground">
             Manage members and invitations for {currentOrganization.name}
           </p>
         </div>
@@ -54,7 +54,7 @@ export default function TeamPage() {
           <Button
             onClick={() => setShowInviteModal(true)}
             size="sm"
-            className="gap-1.5 h-8 text-[13px]"
+            className="gap-1.5   "
           >
             <UserPlus className="h-3.5 w-3.5" />
             Invite
@@ -65,9 +65,9 @@ export default function TeamPage() {
       {/* Stats */}
       <div className="grid gap-3 sm:grid-cols-2">
         <Card>
-          <CardContent className="p-4">
+      
             <div className="flex items-center gap-3">
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <Users className="h-6 w-6 text-muted-foreground" />
               <div>
                 <p className="text-xl font-bold tabular-nums">
                   {members?.length ?? 0}
@@ -75,13 +75,13 @@ export default function TeamPage() {
                 <p className="text-xs text-muted-foreground">Active members</p>
               </div>
             </div>
-          </CardContent>
+    
         </Card>
         {canInvite && (
           <Card>
-            <CardContent className="p-4">
+            
               <div className="flex items-center gap-3">
-                <Mail className="h-4 w-4 text-muted-foreground" />
+                <Mail className="h-6 w-6 text-muted-foreground" />
                 <div>
                   <p className="text-xl font-bold tabular-nums">
                     {invitations?.length ?? 0}
@@ -91,7 +91,7 @@ export default function TeamPage() {
                   </p>
                 </div>
               </div>
-            </CardContent>
+            
           </Card>
         )}
       </div>
@@ -149,7 +149,7 @@ export default function TeamPage() {
                       </p>
                     </div>
                   </div>
-                  <span className="px-2 py-0.5 bg-muted text-muted-foreground rounded-md text-xs font-medium">
+                  <span className="px-2 py-0.5 bg-accent text-muted-foreground rounded-md text-xs font-medium">
                     Pending
                   </span>
                 </div>
