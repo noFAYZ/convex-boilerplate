@@ -17,7 +17,7 @@ export default function ProtectedLayoutWrapper({
           <div className="flex h-screen overflow-hidden bg-sidebar">
             <Sidebar />
 
-            <div className="flex flex-col flex-1 overflow-hidden pt-3 pl-3   ">
+            <div className="flex flex-col flex-1 overflow-hidden   ">
               {/* Mobile Header */}
               <header className="lg:hidden border-b bg-background/80 backdrop-blur-lg px-4 h-12 flex items-center gap-2.5 sticky top-0 z-30">
                 <SidebarToggle />
@@ -30,7 +30,7 @@ export default function ProtectedLayoutWrapper({
               </header>
 
               {/* Main Content */}
-              <main className="flex-1 overflow-y-auto  rounded-tl-2xl border border-b-0 border-r-0 bg-background">
+              <main className="flex-1 overflow-y-auto   border border-b-0 border-r-0 bg-background">
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                   {children}
                 </div>

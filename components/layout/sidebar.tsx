@@ -174,7 +174,7 @@ export const Sidebar = memo(() => {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-50 h-full w-70 bg-sidebar   transition-transform duration-200 ease-out lg:translate-x-0 lg:static lg:z-0 flex flex-col",
+          "fixed left-0 top-0 z-50 h-full w-64 bg-sidebar   transition-transform duration-200 ease-out lg:translate-x-0 lg:static lg:z-0 flex flex-col",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
        
