@@ -41,7 +41,7 @@ export default function TeamPage() {
   }
 
   return (
-    <div className="max-w-4xl space-y-6">
+    <div className=" space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="space-y-0.5">

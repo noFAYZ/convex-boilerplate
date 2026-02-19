@@ -18,6 +18,8 @@ interface OrgContextType {
   organizations: Organization[];
   setCurrentOrganization: (org: Organization) => void;
   isLoading: boolean;
+  isOrgSwitching: boolean;
+  setIsOrgSwitching: (loading: boolean) => void;
 }
 
 const OrgContext = createContext<OrgContextType | null>(null);
@@ -32,6 +34,7 @@ export function OrgProvider({ children }: { children: ReactNode }) {
   const [currentOrgId, setCurrentOrgId] = useState<Id<"organizations"> | null>(
     null
   );
+  const [isOrgSwitching, setIsOrgSwitching] = useState(false);
 
   // Initialize from localStorage on mount
   useEffect(() => {
@@ -69,6 +72,16 @@ export function OrgProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Auto-hide loading overlay when organization switches
+  useEffect(() => {
+    if (isOrgSwitching && currentOrgId) {
+      const timer = setTimeout(() => {
+        setIsOrgSwitching(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [currentOrgId, isOrgSwitching]);
+
   return (
     <OrgContext.Provider
       value={{
@@ -76,6 +89,8 @@ export function OrgProvider({ children }: { children: ReactNode }) {
         organizations: organizations || [],
         setCurrentOrganization,
         isLoading: currentUser === undefined || organizations === undefined,
+        isOrgSwitching,
+        setIsOrgSwitching,
       }}
     >
       {children}

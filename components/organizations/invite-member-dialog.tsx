@@ -6,15 +6,15 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { handleMutationError, handleMutationSuccess } from "@/lib/error-handler";
 import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-  AlertDialogCancel,
-} from "@/components/ui/alert-dialog";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +25,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { UserAdd01Icon } from "@hugeicons/core-free-icons";
 
 interface InviteMemberDialogProps {
   organizationId: Id<"organizations">;
@@ -57,37 +59,42 @@ export function InviteMemberDialog({
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
-      <Button onClick={() => setOpen(true)}>Invite Member</Button>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Invite New Member</AlertDialogTitle>
-          <AlertDialogDescription>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger size="sm">
+        <HugeiconsIcon icon={UserAdd01Icon} className="h-4 w-4" />
+        Invite
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Invite New Member</DialogTitle>
+          <DialogDescription>
             Send an invitation to join your organization
-          </AlertDialogDescription>
-        </AlertDialogHeader>
+          </DialogDescription>
+        </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email Address</Label>
+            <Label htmlFor="email" className="text-xs">Email Address</Label>
             <Input
               id="email"
               type="email"
+        
               placeholder="colleague@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={loading}
+              autoFocus
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="role">Role</Label>
+            <Label htmlFor="role" className="text-xs">Role</Label>
             <Select
               value={role}
               onValueChange={(value) => setRole(value as "admin" | "member")}
               disabled={loading}
             >
-              <SelectTrigger id="role">
+              <SelectTrigger id="role"  className='w-full'>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -98,13 +105,13 @@ export function InviteMemberDialog({
           </div>
         </div>
 
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
-          <Button onClick={handleInvite} disabled={loading || !email}>
+        <DialogFooter>
+          <DialogClose disabled={loading}>Cancel</DialogClose>
+          <Button disabled={loading || !email} onClick={handleInvite} size={'sm'}>
             {loading ? "Sending..." : "Send Invitation"}
           </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

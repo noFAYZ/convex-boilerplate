@@ -17,7 +17,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { ChevronDown, Plus } from "@hugeicons/core-free-icons";
 
 export function OrgSwitcher() {
-  const { currentOrganization, organizations, setCurrentOrganization, isLoading } =
+  const { currentOrganization, organizations, setCurrentOrganization, setIsOrgSwitching, isLoading } =
     useOrganization();
 
   if (isLoading) {
@@ -44,7 +44,8 @@ export function OrgSwitcher() {
       value={currentOrganization?._id}
       onValueChange={(orgId) => {
         const org = organizations.find((o) => o._id === orgId);
-        if (org) {
+        if (org && org._id !== currentOrganization?._id) {
+          setIsOrgSwitching(true);
           setCurrentOrganization(org);
         }
       }}

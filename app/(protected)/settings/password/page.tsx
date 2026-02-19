@@ -68,7 +68,7 @@ export default function PasswordSettingsPage() {
         </p>
       </div>
 
-      <Card>
+      <Card className="p-6">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold">
             Change Password
@@ -86,7 +86,7 @@ export default function PasswordSettingsPage() {
                   onChange={(e) => setCurrentPassword(e.target.value)}
                   required
                   disabled={isLoading}
-                  className="pr-10"
+                
                 />
                 <button
                   type="button"
@@ -132,11 +132,11 @@ export default function PasswordSettingsPage() {
                 </button>
               </div>
               {newPassword && (
-                <div className="mt-2 space-y-1.5">
+                <div className="mt-2 space-y-1 bg-muted w-fit p-2">
                   {passwordRequirements.map((req, i) => (
                     <div key={i} className="flex items-center gap-2 text-xs">
                       {req.met ? (
-                        <Check className="h-3 w-3 text-muted-foreground" />
+                        <Check className="h-3 w-3 text-lime-800" />
                       ) : (
                         <div className="w-3 h-3 rounded-full border border-border" />
                       )}
@@ -189,12 +189,12 @@ export default function PasswordSettingsPage() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="p-6">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold">Security Tips</CardTitle>
         </CardHeader>
         <CardContent>
-          <ul className="space-y-1.5 text-[13px] text-muted-foreground">
+          <ul className="space-y-1.5 text-xs text-muted-foreground">
             <li>Use a unique password that you don&apos;t use elsewhere</li>
             <li>Avoid common words and character patterns</li>
             <li>Consider using a password manager</li>

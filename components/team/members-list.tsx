@@ -140,7 +140,7 @@ export function MembersList({
                   <option value="member">Member</option>
                 </select>
               ) : (
-                <Badge variant={'secondary'} className="text-white rounded-md text-xs capitalize">
+                <Badge variant={'secondary'} className="text-white  capitalize">
                   {member.role}
                 </Badge>
               )}
@@ -148,7 +148,7 @@ export function MembersList({
               {/* Remove Button */}
               {(canManage || isCurrentUser) && (
                 <Button
-                  variant={isCurrentUser ? "default" : "destructive"}
+                  variant={isCurrentUser ? "delete" : "destructive"}
                   size="sm"
                   onClick={() => handleRemove(member._id, member.user?.name)}
                   disabled={isLoading}

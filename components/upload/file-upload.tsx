@@ -64,6 +64,8 @@ export const FileUpload = memo(function FileUpload({
       if (xhr.status === 200) {
         try {
           const data = JSON.parse(xhr.responseText);
+          const normalizedUrl = normalizeImageUrl(data.url);
+          setPreview(normalizedUrl);
           onUploadComplete(data.url);
           toast.dismiss(toastId);
           handleMutationSuccess("Upload successful");
@@ -119,9 +121,9 @@ export const FileUpload = memo(function FileUpload({
   }, [type, onUploadComplete, currentImage]);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 ">
       {preview && (
-        <div className="relative w-24 h-24 rounded-full overflow-hidden border">
+        <div className="relative w-20 h-20 rounded-full overflow-hidden border">
           <img
             src={preview}
             alt="Preview"
@@ -141,6 +143,7 @@ export const FileUpload = memo(function FileUpload({
         <Button
           type="button"
           variant="outline"
+          size='sm'
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
         >

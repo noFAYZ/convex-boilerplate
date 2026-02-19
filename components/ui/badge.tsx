@@ -35,7 +35,7 @@ const badgeVariants = cva(
           "bg-amber-500/10 text-amber-600 dark:text-amber-400 [a]:hover:bg-amber-500/20 border-amber-500/20",
 
         info:
-          "bg-blue-500/10 text-blue-600 dark:text-blue-400 [a]:hover:bg-blue-500/20 border-blue-500/20",
+          "bg-blue-500/70 text-white dark:text-blue-200 [a]:hover:bg-blue-500/20 border-blue-500/20",
 
         neutral:
           "bg-muted text-muted-foreground border-border",

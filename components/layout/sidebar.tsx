@@ -14,6 +14,7 @@ import {
   Settings01Icon,
   Menu01Icon,
   Cancel01Icon,
+  Layers02Icon,
 } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "./sidebar-provider";
@@ -51,6 +52,12 @@ const NAVIGATION_SECTIONS: NavSection[] = [
     title: "Settings",
     items: [
       { name: "Profile", href: "/settings/profile", icon: Settings01Icon },
+    ],
+  },
+  {
+    title: "Development",
+    items: [
+      { name: "Components", href: "/components", icon: Layers02Icon, badge: "Demo" },
     ],
   },
 ] as const;

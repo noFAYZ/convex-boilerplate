@@ -279,3 +279,26 @@ export const listInvitations = query({
       .collect();
   },
 });
+
+export const deleteInvitation = mutation({
+  args: { invitationId: v.id("invitations") },
+  handler: async (ctx, args) => {
+    const userId = await auth.requireUserId(ctx);
+
+    const invitation = await ctx.db.get(args.invitationId);
+    if (!invitation) throw new Error("Invitation not found");
+
+    await requireOrgAdmin(ctx, invitation.organizationId, userId);
+
+    await ctx.db.delete(args.invitationId);
+
+    await logActivity(ctx, {
+      organizationId: invitation.organizationId,
+      userId,
+      action: "invitation.revoked",
+      entityType: "invitation",
+      entityId: args.invitationId,
+      metadata: { email: invitation.email },
+    });
+  },
+});

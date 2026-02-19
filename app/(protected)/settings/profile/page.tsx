@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
@@ -17,16 +17,17 @@ export default function ProfileSettingsPage() {
   const updateProfile = useMutation(api.users.update);
   const deleteAccount = useMutation(api.users.deleteAccount);
 
-  const [name, setName] = useState(currentUser?.name || "");
-  const [image, setImage] = useState(currentUser?.image || "");
+  const [name, setName] = useState("");
+  const [image, setImage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  if (currentUser && !name && currentUser.name) {
-    setName(currentUser.name);
-  }
-  if (currentUser && !image && currentUser.image) {
-    setImage(currentUser.image);
-  }
+  // Initialize form fields when currentUser data loads
+  useEffect(() => {
+    if (currentUser) {
+      setName(currentUser.name || "");
+      setImage(currentUser.image || "");
+    }
+  }, [currentUser?.id]); // Only re-initialize when user changes, not on every query update
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,13 +71,12 @@ export default function ProfileSettingsPage() {
   return (
     <div className="max-w-2xl space-y-6">
  
-
-      <Card>
+      <Card className="p-6">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold">Personal Information</CardTitle>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+   
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label>Profile Picture</Label>
               <FileUpload
@@ -92,10 +92,11 @@ export default function ProfileSettingsPage() {
               <Input
                 id="name"
                 type="text"
+
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={isLoading}
-                className="h-11"
+                className="h-10"
               />
             </div>
 
@@ -106,14 +107,15 @@ export default function ProfileSettingsPage() {
                 type="email"
                 value={currentUser.email || ""}
                 disabled
-                className="h-11 bg-muted"
+                className="h-10 bg-muted"
+                
               />
               <p className="text-xs text-muted-foreground">
                 Email cannot be changed
               </p>
             </div>
 
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading}       size='sm'>
               {isLoading ? (
                 <>
                   <HugeiconsIcon icon={Loading01Icon} className="mr-2 h-4 w-4 animate-spin" />
@@ -124,18 +126,17 @@ export default function ProfileSettingsPage() {
               )}
             </Button>
           </form>
-        </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="pb-3">
+      <Card className="p-4">
+        <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold text-destructive">Danger Zone</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">
             Permanently delete your account and all associated data. This action cannot be undone.
           </p>
-          <Button variant="destructive" onClick={handleDeleteAccount}>
+          <Button variant="delete" onClick={handleDeleteAccount}  size='sm'>
             Delete Account
           </Button>
         </CardContent>

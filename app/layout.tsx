@@ -50,9 +50,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${myFont4.className}  antialiased`}
-      >
+      <body  className={`${myFont4.className}  antialiased`}  >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ConvexClientProvider>{children}</ConvexClientProvider>
           <Toaster />
