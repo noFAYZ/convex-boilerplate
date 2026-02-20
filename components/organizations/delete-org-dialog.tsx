@@ -52,7 +52,7 @@ export function DeleteOrgDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger variant="delete" size="sm">
-        <HugeiconsIcon icon={Trash} className="h-4 w-4" />
+        <HugeiconsIcon icon={Trash} className="h-3.5 w-3.5" />
         Delete
       </DialogTrigger>
       <DialogContent>

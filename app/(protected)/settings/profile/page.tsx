@@ -9,8 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileUpload } from "@/components/upload/file-upload";
 import { handleMutationError, handleMutationSuccess } from "@/lib/error-handler";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Loading01Icon } from "@hugeicons/core-free-icons";
+import { Loading01Icon, AlertCircleIcon } from "@hugeicons/core-free-icons";
 
 export default function ProfileSettingsPage() {
   const currentUser = useQuery(api.users.getCurrent);
@@ -27,7 +28,13 @@ export default function ProfileSettingsPage() {
       setName(currentUser.name || "");
       setImage(currentUser.image || "");
     }
-  }, [currentUser?.id]); // Only re-initialize when user changes, not on every query update
+  }, [currentUser?._id]); // Only re-initialize when user changes (Convex uses _id, not id)
+
+  // Check if there are unsaved changes
+  const hasUnsavedChanges = currentUser && (
+    name !== (currentUser.name || "") ||
+    image !== (currentUser.image || "")
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,7 +77,16 @@ export default function ProfileSettingsPage() {
 
   return (
     <div className="max-w-2xl space-y-6">
- 
+      {/* Unsaved Changes Alert */}
+      {hasUnsavedChanges && (
+        <Alert variant="destructive">
+          <HugeiconsIcon icon={AlertCircleIcon} className="h-4 w-4" />
+          <AlertDescription>
+            You have unsaved changes. Click "Save Changes" to update your profile.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <Card className="p-6">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold">Personal Information</CardTitle>

@@ -21,7 +21,6 @@ export default function OrganizationSettingsPage() {
   const [activeOrgId, setActiveOrgId] = useState<Id<"organizations"> | null>(
     null
   );
-  const [refreshInvitations, setRefreshInvitations] = useState(0);
 
   const invitations = useQuery(
     api.members.listInvitations,
@@ -164,7 +163,6 @@ export default function OrganizationSettingsPage() {
                 <InvitationList
                   invitations={invitations}
                   organizationId={activeOrg._id}
-                  onInvitationRemoved={() => setRefreshInvitations(r => r + 1)}
                 />
               ) : (
                 <div className="flex items-center justify-center py-8">

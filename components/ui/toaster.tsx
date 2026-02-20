@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useMemo, useCallback } from "react";
+import { memo, useCallback } from "react";
 import { useToastStore, type Toast } from "@/hooks/use-toast";
 import { toast } from "@/hooks/use-toast";
 import { HugeiconsIcon } from "@hugeicons/react";

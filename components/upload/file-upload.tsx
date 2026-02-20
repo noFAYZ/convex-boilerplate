@@ -23,9 +23,11 @@ export const FileUpload = memo(function FileUpload({
   const [preview, setPreview] = useState<string | null>(normalizeImageUrl(currentImage));
   const [error, setError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const currentImageRef = useRef(currentImage);
 
-  // Update preview when currentImage prop changes
+  // Keep ref in sync with prop
   useEffect(() => {
+    currentImageRef.current = currentImage;
     setPreview(normalizeImageUrl(currentImage));
   }, [currentImage]);
 
@@ -75,7 +77,7 @@ export const FileUpload = memo(function FileUpload({
           setError(errorMsg);
           toast.dismiss(toastId);
           toast.error("Upload failed", errorMsg);
-          setPreview(normalizeImageUrl(currentImage));
+          setPreview(normalizeImageUrl(currentImageRef.current));
           setIsUploading(false);
         }
       } else {
@@ -85,14 +87,14 @@ export const FileUpload = memo(function FileUpload({
           setError(errorMsg);
           toast.dismiss(toastId);
           toast.error("Upload failed", errorMsg);
-          setPreview(normalizeImageUrl(currentImage));
+          setPreview(normalizeImageUrl(currentImageRef.current));
           setIsUploading(false);
         } catch {
           const errorMsg = "Upload failed";
           setError(errorMsg);
           toast.dismiss(toastId);
           toast.error("Upload failed", errorMsg);
-          setPreview(normalizeImageUrl(currentImage));
+          setPreview(normalizeImageUrl(currentImageRef.current));
           setIsUploading(false);
         }
       }
@@ -103,7 +105,7 @@ export const FileUpload = memo(function FileUpload({
       setError(errorMsg);
       toast.dismiss(toastId);
       toast.error("Upload failed", errorMsg);
-      setPreview(normalizeImageUrl(currentImage));
+      setPreview(normalizeImageUrl(currentImageRef.current));
       setIsUploading(false);
     });
 
@@ -112,13 +114,13 @@ export const FileUpload = memo(function FileUpload({
       setError(errorMsg);
       toast.dismiss(toastId);
       toast.error("Upload cancelled", errorMsg);
-      setPreview(normalizeImageUrl(currentImage));
+      setPreview(normalizeImageUrl(currentImageRef.current));
       setIsUploading(false);
     });
 
     xhr.open("POST", "/api/upload");
     xhr.send(formData);
-  }, [type, onUploadComplete, currentImage]);
+  }, [type, onUploadComplete]);
 
   return (
     <div className="space-y-3 ">

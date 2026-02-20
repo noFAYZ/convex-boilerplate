@@ -12,13 +12,13 @@ function Dialog({ ...props }: DialogPrimitive.Root.Props) {
 
 function DialogTrigger({
   className,
+  children,
   ...props
 }: React.ComponentProps<typeof Button>) {
   return (
     <DialogPrimitive.Trigger
-      render={<Button className={cn(className)} />}
+      render={<Button className={cn(className)} {...props}>{children}</Button>}
       data-slot="dialog-trigger"
-      {...props}
     />
   )
 }

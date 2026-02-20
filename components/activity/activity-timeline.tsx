@@ -14,7 +14,7 @@ import {
   CameraIcon,
 } from "@hugeicons/core-free-icons";
 import { memo, useMemo } from "react";
-// Format relative time without external dependencies
+
 const formatRelativeTime = (date: Date): string => {
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
@@ -27,165 +27,265 @@ const formatRelativeTime = (date: Date): string => {
   return date.toLocaleDateString();
 };
 
+interface ActivityLog {
+  _id: string;
+  timestamp: number;
+  action: string;
+  user?: { id?: string; name?: string; email?: string; image?: string } | null;
+  organization?: { id?: string; name?: string } | null;
+  metadata?: Record<string, string | undefined>;
+}
+
+interface GroupedActivity {
+  date: string;
+  activities: ActivityLog[];
+}
+
 interface ActivityTimelineProps {
   organizationId?: Id<"organizations">;
   limit?: number;
 }
 
-interface GroupedActivity {
-  date: string;
-  activities: Array<any>;
+type ActionType = "invite" | "join" | "remove" | "role" | "profile" | "default";
+
+interface ActivityIconConfig {
+  icon: IconSvgElement;
+  type: ActionType;
 }
 
-export const ActivityTimeline = memo(function ActivityTimeline({ organizationId, limit = 50 }: ActivityTimelineProps) {
+const ACTIVITY_TYPE_COLORS: Record<ActionType, string> = {
+  invite: "bg-blue-500",
+  join: "bg-green-600",
+  remove: "bg-red-600",
+  role: "bg-amber-500",
+  profile: "bg-pink-500",
+  default: "bg-gray-500",
+};
+
+const getActivityIcon = (action: string): ActivityIconConfig => {
+  if (action.includes("invited")) {
+    return { icon: UserAdd01Icon, type: "invite" };
+  }
+  if (action.includes("joined")) {
+    return { icon: UserCheck01Icon, type: "join" };
+  }
+  if (action.includes("removed") || action.includes("left")) {
+    return { icon: UserMinus01Icon, type: "remove" };
+  }
+  if (action.includes("role")) {
+    return { icon: SecurityCheckIcon, type: "role" };
+  }
+  if (action.includes("avatar") || action.includes("profile")) {
+    return { icon: CameraIcon, type: "profile" };
+  }
+  return { icon: File01Icon, type: "default" };
+};
+
+const getActionText = (
+  action: string,
+  metadata: Record<string, string | undefined> | undefined
+): string => {
+  switch (action) {
+    case "member.invited":
+      return `invited ${metadata?.email ?? "someone"} as ${metadata?.role ?? "member"}`;
+    case "member.joined":
+      return `joined as ${metadata?.role ?? "member"}`;
+    case "member.removed":
+      return `removed ${metadata?.targetUserEmail ?? "a member"}`;
+    case "member.left":
+      return "left the organization";
+    case "member.role_updated":
+      return `changed role from ${metadata?.oldRole ?? "?"} to ${metadata?.newRole ?? "?"}`;
+    case "avatar_updated":
+      return "updated their avatar";
+    case "profile_updated":
+      return "updated their profile";
+    default:
+      return action.replace(/[_.]/g, " ");
+  }
+};
+
+const formatDate = (date: Date): string =>
+  date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+
+const formatTime = (date: Date): string =>
+  date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+function LoadingState() {
+  return (
+    <div className="flex flex-col items-center justify-center py-16">
+      <div className="h-6 w-6 border-2 border-muted-foreground/30 border-t-foreground rounded-full animate-spin mb-3" />
+      <p className="text-sm text-muted-foreground">Loading activity...</p>
+    </div>
+  );
+}
+
+function EmptyState({ organizationId }: { organizationId?: Id<"organizations"> }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 px-4">
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted/50">
+        <HugeiconsIcon icon={File01Icon} className="h-6 w-6 text-muted-foreground/50" />
+      </div>
+      <p className="text-sm font-medium text-foreground">No activity yet</p>
+      <p className="mt-1 text-xs text-muted-foreground">
+        {organizationId
+          ? "Activity will appear here as your team collaborates"
+          : "Start using the app to see activity"}
+      </p>
+    </div>
+  );
+}
+
+function ActivityCard({
+  log,
+  isLast,
+  type,
+  icon,
+  showOrganization,
+}: {
+  log: ActivityLog;
+  isLast: boolean;
+  type: ActionType;
+  icon: IconSvgElement;
+  showOrganization: boolean;
+}) {
+  const timestamp = new Date(log.timestamp);
+  const initials =
+    log.user?.name
+      ?.split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase() ?? "U";
+
+  const bgColor = ACTIVITY_TYPE_COLORS[type];
+
+  return (
+    <div className="relative pl-8">
+      {/* Timeline connector line */}
+      {!isLast && <div className="absolute left-3 top-6 h-10 w-px bg-border" />}
+
+      {/* Timeline dot with avatar or initials */}
+      <div className="absolute -left-1 top-1.5 flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border-2 border-background bg-background">
+        {log.user?.image ? (
+          <img
+            src={normalizeImageUrl(log.user.image) || ""}
+            alt={log.user?.name || "User"}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div
+            className={`flex h-full w-full items-center justify-center text-xs font-semibold text-white ${bgColor}`}
+          >
+            {initials}
+          </div>
+        )}
+      </div>
+
+      {/* Activity content */}
+      <div className="overflow-hidden rounded-lg border border-border bg-card transition-colors hover:bg-muted/30">
+        <div className="space-y-2 p-3">
+          {/* Action text */}
+          <p className="text-sm leading-snug text-foreground">
+            <span className="font-medium">{log.user?.name ?? "Someone"}</span>
+            {" "}
+            <span className="text-muted-foreground">
+              {getActionText(log.action, log.metadata)}
+            </span>
+          </p>
+
+          {/* Organization context (if applicable) */}
+          {showOrganization && log.organization && (
+            <p className="text-xs text-muted-foreground">
+              in <span className="font-medium text-foreground">{log.organization.name}</span>
+            </p>
+          )}
+
+          {/* Timestamp */}
+          <div className="flex items-center gap-2 pt-1 text-xs text-muted-foreground">
+            <time dateTime={new Date(log.timestamp).toISOString()}>
+              {formatTime(timestamp)}
+            </time>
+            <span className="text-border">·</span>
+            <span>{formatRelativeTime(timestamp)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export const ActivityTimeline = memo(function ActivityTimeline({
+  organizationId,
+  limit = 50,
+}: ActivityTimelineProps) {
   const activity = useQuery(
     organizationId ? api.activity.list : api.activity.getRecent,
     organizationId ? { organizationId, limit } : { limit }
   );
 
-  // Memoize grouped activities to avoid recalculation on every render
   const groupedActivities = useMemo(() => {
     if (!activity?.length) return [];
 
-  if (activity === undefined) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16">
-        <div className="w-6 h-6 border-2 border-muted-foreground/30 border-t-foreground rounded-full animate-spin mb-3" />
-        <p className="text-sm text-muted-foreground">Loading activity...</p>
-      </div>
-    );
-  }
-
-  if (activity.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 px-4">
-        <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-4">
-          <HugeiconsIcon icon={File01Icon} className="h-6 w-6 text-muted-foreground/50" />
-        </div>
-        <p className="text-sm font-medium text-foreground">No activity yet</p>
-        <p className="text-xs text-muted-foreground mt-1">
-          {organizationId ? "Activity will appear here as your team collaborates" : "Start using the app to see activity"}
-        </p>
-      </div>
-    );
-  }
-
     return activity.reduce((acc: GroupedActivity[], log) => {
       const date = new Date(log.timestamp);
-      const dateKey = date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+      const dateKey = formatDate(date);
 
       const existing = acc.find((g) => g.date === dateKey);
       if (existing) {
-        existing.activities.push(log);
+        existing.activities.push(log as ActivityLog);
       } else {
-        acc.push({ date: dateKey, activities: [log] });
+        acc.push({ date: dateKey, activities: [log as ActivityLog] });
       }
       return acc;
     }, []);
   }, [activity]);
 
-  const getActivityIcon = (action: string): { icon: IconSvgElement; color: string } => {
-    if (action.includes("invited")) return { icon: UserAdd01Icon, color: "text-blue-500" };
-    if (action.includes("joined")) return { icon: UserCheck01Icon, color: "text-green-500" };
-    if (action.includes("removed") || action.includes("left")) return { icon: UserMinus01Icon, color: "text-red-500" };
-    if (action.includes("role")) return { icon: SecurityCheckIcon, color: "text-amber-500" };
-    if (action.includes("avatar") || action.includes("profile")) return { icon: CameraIcon, color: "text-purple-500" };
-    return { icon: File01Icon, color: "text-gray-500" };
-  };
+  if (activity === undefined) {
+    return <LoadingState />;
+  }
 
-  const getActionText = (action: string, metadata: Record<string, string | undefined> | undefined) => {
-    switch (action) {
-      case "member.invited":
-        return `invited ${metadata?.email ?? "someone"} as <span class="font-medium">${metadata?.role ?? "member"}</span>`;
-      case "member.joined":
-        return `joined as <span class="font-medium">${metadata?.role ?? "member"}</span>`;
-      case "member.removed":
-        return `removed <span class="font-medium">${metadata?.targetUserEmail ?? "a member"}</span>`;
-      case "member.left":
-        return "left the organization";
-      case "member.role_updated":
-        return `changed role from <span class="font-medium">${metadata?.oldRole ?? "?"}</span> to <span class="font-medium">${metadata?.newRole ?? "?"}</span>`;
-      case "avatar_updated":
-        return "updated their avatar";
-      case "profile_updated":
-        return "updated their profile";
-      default:
-        return action.replace(/[_.]/g, " ");
-    }
-  };
+  if (activity.length === 0) {
+    return <EmptyState organizationId={organizationId} />;
+  }
 
   return (
     <div className="space-y-8">
       {groupedActivities.map((group, groupIndex) => (
         <div key={group.date}>
-          {/* Date Header */}
-          <div className="flex items-center gap-4 mb-6">
-            <div className="flex-1 h-px bg-border" />
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3">
+          {/* Date separator */}
+          <div className="mb-6 flex items-center gap-3">
+            <div className="h-px flex-1 bg-border" />
+            <time className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               {group.date}
-            </p>
-            <div className="flex-1 h-px bg-border" />
+            </time>
+            <div className="h-px flex-1 bg-border" />
           </div>
 
-          {/* Activities */}
+          {/* Activities list */}
           <div className="space-y-0">
             {group.activities.map((log, index) => {
-              const { icon, color } = getActivityIcon(log.action);
-              const timestamp = new Date(log.timestamp);
-              const isLast = index === group.activities.length - 1 && groupIndex === groupedActivities.length - 1;
+              const { icon, type } = getActivityIcon(log.action);
+              const isLast =
+                index === group.activities.length - 1 &&
+                groupIndex === groupedActivities.length - 1;
 
               return (
-                <div key={log._id} className="relative pl-8">
-                  {/* Timeline line */}
-                  {!isLast && (
-                    <div className="absolute left-3 top-6 w-px h-10 bg-border" />
-                  )}
-
-                  {/* Timeline dot - Profile picture or initials */}
-                  <div className="absolute -left-1 top-1.5 w-8 h-8 rounded-full border-2 border-background overflow-hidden bg-background">
-                    {log.user?.image ? (
-                      <img
-                        src={normalizeImageUrl(log.user.image) || ""}
-                        alt={log.user?.name || "User"}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className={`w-full h-full flex items-center justify-center text-xs font-semibold text-white ${color} bg-muted`}>
-                        {log.user?.name?.charAt(0).toUpperCase() || "U"}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Activity card */}
-                  <div className="group bg-card border rounded-lg p-4 hover:border-primary/30 hover:shadow-sm transition-all">
-                    <div className="flex items-start justify-between gap-4 mb-2">
-                      <div>
-                        <p className="text-sm font-medium text-foreground">
-                          <span>{log.user?.name ?? "Someone"}</span>
-                          {" "}
-                          <span
-                            className="text-muted-foreground"
-                            dangerouslySetInnerHTML={{ __html: getActionText(log.action, log.metadata as Record<string, string | undefined>) }}
-                          />
-                        </p>
-                        {!organizationId && "organization" in log && log.organization && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            in <span className="font-medium">{(log.organization as { name: string }).name}</span>
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {timestamp.toLocaleTimeString("en-US", {
-                        hour: "numeric",
-                        minute: "2-digit",
-                        hour12: true,
-                      })}
-                      {" — "}
-                      {formatRelativeTime(timestamp)}
-                    </p>
-                  </div>
-                </div>
+                <ActivityCard
+                  key={log._id}
+                  log={log}
+                  isLast={isLast}
+                  type={type}
+                  icon={icon}
+                  showOrganization={!organizationId}
+                />
               );
             })}
           </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
-import { Loading, LoadingSpinner } from "@/components/ui/loading";
+import { LoadingSpinner } from "@/components/ui/loading";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -31,51 +31,70 @@ import { toast } from "@/hooks/use-toast";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   AlertCircleIcon,
-  Check,
-  CheckCircle,
   InformationCircleIcon,
+  Tick02Icon,
 } from "@hugeicons/core-free-icons";
-import { CheckCheck } from "lucide-react";
 
 export default function ComponentsPage() {
   const [progress, setProgress] = useState(45);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const showSuccessToast = () => {
+  // Cleanup intervals on unmount
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
+
+  const showSuccessToast = useCallback(() => {
     toast.success("Success!", "Operation completed successfully");
-  };
+  }, []);
 
-  const showErrorToast = () => {
+  const showErrorToast = useCallback(() => {
     toast.error("Error", "Something went wrong");
-  };
+  }, []);
 
-  const showInfoToast = () => {
+  const showInfoToast = useCallback(() => {
     toast.info("Info", "Here is some information");
-  };
+  }, []);
 
-  const showLoadingToast = () => {
+  const showLoadingToast = useCallback(() => {
     const toastId = toast.loading("Loading...", "Please wait");
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       toast.dismiss(toastId);
       toast.success("Done!", "Loading completed");
     }, 3000);
-  };
+    // Cleanup on unmount
+    return () => clearTimeout(timeoutId);
+  }, []);
 
-  const showProgressToast = () => {
+  const showProgressToast = useCallback(() => {
+    // Clear any existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
     const toastId = toast.loading("Uploading...", `0%`);
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += Math.random() * 30;
-      if (progress >= 100) {
-        progress = 100;
-        clearInterval(interval);
+    let progressValue = 0;
+
+    intervalRef.current = setInterval(() => {
+      progressValue += Math.random() * 30;
+      if (progressValue >= 100) {
+        progressValue = 100;
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
         toast.dismiss(toastId);
         toast.success("Upload complete!", "File uploaded successfully");
       } else {
-        toast.progress(toastId, Math.min(progress, 100), `Uploading... ${Math.round(Math.min(progress, 100))}%`);
+        toast.progress(toastId, Math.min(progressValue, 100), `Uploading... ${Math.round(Math.min(progressValue, 100))}%`);
       }
     }, 500);
-  };
+  }, []);
 
   return (
     <div className="space-y-8 max-w-6xl">
@@ -387,23 +406,23 @@ export default function ComponentsPage() {
             </p>
             <ul className="text-sm space-y-2 text-muted-foreground">
               <li className="flex gap-2">
-            
-                <CheckCheck className="h-4 w-4 flex-shrink-0 mt-0.5 text-green-600" />
+                <HugeiconsIcon icon={Tick02Icon} className="h-4 w-4 flex-shrink-0 mt-0.5 text-green-600" />
+                <span>Success, error, info, and loading toast types</span>
               </li>
               <li className="flex gap-2">
-                <CheckCheck className="h-4 w-4 flex-shrink-0 mt-0.5 text-green-600" />
+                <HugeiconsIcon icon={Tick02Icon} className="h-4 w-4 flex-shrink-0 mt-0.5 text-green-600" />
                 <span>Progress tracking with visual progress bar</span>
               </li>
               <li className="flex gap-2">
-                <CheckCheck className="h-4 w-4 flex-shrink-0 mt-0.5 text-green-600" />
+                <HugeiconsIcon icon={Tick02Icon} className="h-4 w-4 flex-shrink-0 mt-0.5 text-green-600" />
                 <span>Auto-dismiss on completion</span>
               </li>
               <li className="flex gap-2">
-                <CheckCheck className="h-4 w-4 flex-shrink-0 mt-0.5 text-green-600" />
+                <HugeiconsIcon icon={Tick02Icon} className="h-4 w-4 flex-shrink-0 mt-0.5 text-green-600" />
                 <span>Dismissable toasts with close button</span>
               </li>
               <li className="flex gap-2">
-                <CheckCheck className="h-4 w-4 flex-shrink-0 mt-0.5 text-green-600" />
+                <HugeiconsIcon icon={Tick02Icon} className="h-4 w-4 flex-shrink-0 mt-0.5 text-green-600" />
                 <span>No status borders for clean appearance</span>
               </li>
             </ul>
