@@ -9,13 +9,10 @@ import { AuthButton } from "@/components/auth/auth-button";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import {
   DashboardSquare01Icon,
-  UserGroupIcon,
-  Activity01Icon,
   Settings01Icon,
   Menu01Icon,
   Cancel01Icon,
   Layers02Icon,
-  Wallet02Icon,
 } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "./sidebar-provider";
@@ -37,28 +34,9 @@ interface NavSection {
 // Hoist static data outside component to prevent recreating on every render
 const NAVIGATION_SECTIONS: NavSection[] = [
   {
-    title: "Main",
+    title: "Menu",
     items: [
       { name: "Dashboard", href: "/dashboard", icon: DashboardSquare01Icon },
-      { name: "Activity", href: "/activity", icon: Activity01Icon },
-    ],
-  },
-  {
-    title: "Manage",
-    items: [
-      { name: "Team", href: "/team", icon: UserGroupIcon, badge: "New" },
-    ],
-  },
-  {
-    title: "Settings",
-    items: [
-      { name: "Profile", href: "/settings/profile", icon: Settings01Icon },
-      { name: "Billing", href: "/billing", icon: Wallet02Icon },
-    ],
-  },
-  {
-    title: "Development",
-    items: [
       { name: "Components", href: "/components", icon: Layers02Icon, badge: "Demo" },
     ],
   },
@@ -178,7 +156,7 @@ export const Sidebar = memo(() => {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-50 h-full w-60 bg-sidebar    lg:translate-x-0 lg:static lg:z-0 flex flex-col",
+          "fixed left-0 top-0 z-50 h-full w-64 bg-sidebar    lg:translate-x-0 lg:static lg:z-0 flex flex-col",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
        
@@ -212,13 +190,32 @@ export const Sidebar = memo(() => {
           ))}
         </nav>
 
-        {/* Footer */}
+        {/* Footer with Settings */}
         <div className="px-3 py-4 space-y-3"  >
-          <div className="flex items-center justify-between px-2">
-          <AuthButton isCollapsed={false} />
-            <ThemeSwitcher />
+   
+          <div className="flex items-center justify-between px-2 pt-2">
+            <AuthButton isCollapsed={false} />
+           
+            <div className=" flex gap-3 items-center"> <ThemeSwitcher />
+              <Button
+                asChild
+                variant={  "outline"  }
+             className="rounded-full border-border/30 shadow-xs "
+                size={'icon'}
+              >
+                <Link href="/settings/profile" className="flex w-8 h-8 items-center gap-3">
+                  <HugeiconsIcon
+                    icon={Settings01Icon}
+                    className={cn(
+                      "h-5 w-5 shrink-0 transition-transform duration-75",
+             
+                    )}
+                  />
+        
+                </Link>
+              </Button>
+            </div>
           </div>
-         
         </div>
       </aside>
     </>

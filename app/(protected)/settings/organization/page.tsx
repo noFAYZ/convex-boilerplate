@@ -19,14 +19,13 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Building03Icon, LogoutCircleIcon } from "@hugeicons/core-free-icons";
 import { Card } from "@/components/ui/card";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function OrganizationSettingsPage() {
   const router = useRouter();
@@ -241,7 +240,7 @@ export default function OrganizationSettingsPage() {
                 <p className="text-xs text-muted-foreground">
                   You will no longer have access to this organization and its data.
                 </p>
-                <AlertDialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
+                <Dialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
                   <Button
                     variant="destructive"
                     size="sm"
@@ -251,27 +250,31 @@ export default function OrganizationSettingsPage() {
                     <HugeiconsIcon icon={LogoutCircleIcon} className="mr-2 h-4 w-4" />
                     Leave Organization
                   </Button>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Leave Organization?</AlertDialogTitle>
-                      <AlertDialogDescription>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Leave Organization?</DialogTitle>
+                      <DialogDescription>
                         Are you sure you want to leave <strong>{activeOrg.name}</strong>? You will no longer have access to this organization and its data.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <div className="flex gap-2 justify-end">
-                      <AlertDialogCancel disabled={isLeavingOrg}>
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowLeaveDialog(false)}
+                        disabled={isLeavingOrg}
+                      >
                         Cancel
-                      </AlertDialogCancel>
-                      <AlertDialogAction
+                      </Button>
+                      <Button
+                        variant="destructive"
                         onClick={handleLeaveOrganization}
                         disabled={isLeavingOrg}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                       >
                         {isLeavingOrg ? "Leaving..." : "Leave"}
-                      </AlertDialogAction>
-                    </div>
-                  </AlertDialogContent>
-                </AlertDialog>
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </>
             )}
           </div>

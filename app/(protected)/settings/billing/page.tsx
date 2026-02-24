@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState, useRef } from "react";
 import { useQuery, useAction } from "convex/react";
 import { useSearchParams, useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import { toast } from "@/hooks/use-toast";
 import { api } from "@/convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -69,7 +69,7 @@ export default function BillingPage() {
             const result = await syncSubscription();
             console.log("[PAGE] Sync result:", result);
             setShowSuccessDialog(true);
-            toast.success("Subscription updated successfully!");
+            toast.success("Plan Upgraded!", "Your subscription has been updated successfully");
             setIsSyncing(false);
             window.history.replaceState({}, document.title, window.location.pathname);
             return;
@@ -89,14 +89,14 @@ export default function BillingPage() {
 
         // All retries failed - still show success dialog since webhook might arrive
         console.error("[PAGE] Sync failed after retries:", lastError);
-        toast.error(`Sync still pending. Subscription data will update when available.`);
+        toast.info("Syncing...", "Your subscription will update when data is available");
         setShowSuccessDialog(true); // Show success dialog anyway - webhook might arrive
         setIsSyncing(false);
         window.history.replaceState({}, document.title, window.location.pathname);
       }
 
       if (searchParams.get("error")) {
-        toast.error("Something went wrong. Please try again.");
+        toast.error("Payment Error", "Something went wrong during checkout. Please try again.");
         window.history.replaceState({}, document.title, window.location.pathname);
       }
     };
@@ -114,12 +114,15 @@ export default function BillingPage() {
 
       setLoadingPlan(plan);
       try {
+        const loadingId = toast.loading("Creating checkout...");
         const { checkoutUrl } = await createCheckout({ plan });
+        toast.dismiss(loadingId);
+        toast.success("Redirecting to payment...");
         // Redirect to checkout in same tab to handle success properly
         window.location.href = checkoutUrl;
       } catch (error) {
         const message = error instanceof Error ? error.message : "Failed to create checkout";
-        toast.error(message);
+        toast.error("Checkout Error", message);
         setLoadingPlan(null);
       }
     },
@@ -130,12 +133,14 @@ export default function BillingPage() {
     setShowCancelDialog(false);
     setLoadingPlan("cancel");
     try {
+      const loadingId = toast.loading("Canceling subscription...");
       await cancelSub();
-      toast.success("Subscription will be canceled at the end of your billing period");
+      toast.dismiss(loadingId);
+      toast.success("Subscription Canceled", "Your subscription will be canceled at the end of your billing period");
       router.refresh();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to cancel subscription";
-      toast.error(message);
+      toast.error("Cancellation Error", message);
     } finally {
       setLoadingPlan(null);
     }
@@ -144,12 +149,14 @@ export default function BillingPage() {
   const handleReactivate = useCallback(async () => {
     setLoadingPlan("reactivate");
     try {
+      const loadingId = toast.loading("Reactivating subscription...");
       await reactivateSub();
-      toast.success("Subscription reactivated successfully");
+      toast.dismiss(loadingId);
+      toast.success("Subscription Reactivated", "Your subscription is now active again");
       router.refresh();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to reactivate subscription";
-      toast.error(message);
+      toast.error("Reactivation Error", message);
     } finally {
       setLoadingPlan(null);
     }
@@ -171,12 +178,14 @@ export default function BillingPage() {
           onClick={async () => {
             setIsSyncing(true);
             try {
+              const loadingId = toast.loading("Syncing subscription...");
               await syncSubscription();
-              toast.success("Subscription synced!");
+              toast.dismiss(loadingId);
+              toast.success("Synced!", "Your subscription data is up to date");
               router.refresh();
             } catch (error) {
               const msg = error instanceof Error ? error.message : "Sync failed";
-              toast.error(msg);
+              toast.error("Sync Error", msg);
             } finally {
               setIsSyncing(false);
             }

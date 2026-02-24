@@ -7,7 +7,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "focus-visible:border-ring focus-visible:ring-ring aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-xs/relaxed font-medium focus-visible:ring-2 aria-invalid:ring-2   inline-flex items-center justify-center whitespace-nowrap transition-all disabled:pointer-events-none disabled:opacity-50  shrink-0   outline-none group/button select-none cursor-pointer font-semibold",
+  "focus-visible:border-ring focus-visible:ring-ring aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-xs/relaxed font-medium focus-visible:ring-2 aria-invalid:ring-2   inline-flex items-center justify-center whitespace-nowrap transition-all duration-0 disabled:pointer-events-none disabled:opacity-50  shrink-0   active:scale-98 outline-none group/button select-none cursor-pointer font-semibold",
   {
     variants: {
       variant: {
@@ -20,9 +20,10 @@ const buttonVariants = cva(
   hover:brightness-105
   active:brightness-95
   focus-visible:ring-orange-400/40
+ 
 `,
-        outline: "border-border dark:bg-input/30 hover:bg-muted bg-card   shadow-[0_1px_2px_rgba(0,0,0,0.15)] hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground",
-        secondary: "bg-gradient-to-br from-secondary/90 via-secondary to-secondary/70 text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground border-[#CAF1D7]",
+        outline: "border-border/50 dark:bg-input/30 hover:bg-muted bg-card   shadow-[0_1px_2px_rgba(0,0,0,0.15)] hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground ",
+        secondary: "bg-gradient-to-br from-secondary/90 via-secondary to-secondary/70 text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground border-[#CAF1D7] shadow-[0_1px_2px_rgba(0,0,0,0.15)] ",
         ghost: "hover:bg-muted hover:text-foreground dark:hover:bg-muted aria-expanded:bg-muted aria-expanded:text-foreground",
         destructive: "bg-destructive/10 hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/20 text-destructive focus-visible:border-destructive/40 dark:hover:bg-destructive/30",
         link: "text-primary underline-offset-4 hover:underline",

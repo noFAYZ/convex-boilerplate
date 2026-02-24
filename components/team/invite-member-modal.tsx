@@ -4,6 +4,14 @@ import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { handleMutationError, handleMutationSuccess } from "@/lib/error-handler";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,14 +25,16 @@ import {
 import { Id } from "@/convex/_generated/dataModel";
 
 interface InviteMemberModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   organizationId: Id<"organizations">;
-  onClose: () => void;
   onSuccess?: () => void;
 }
 
 export function InviteMemberModal({
+  open,
+  onOpenChange,
   organizationId,
-  onClose,
   onSuccess,
 }: InviteMemberModalProps) {
   const [email, setEmail] = useState("");
@@ -45,7 +55,9 @@ export function InviteMemberModal({
       });
       handleMutationSuccess("Invitation sent successfully");
       onSuccess?.();
-      onClose();
+      onOpenChange(false);
+      setEmail("");
+      setRole("member");
     } catch (err) {
       handleMutationError(err);
     } finally {
@@ -54,26 +66,22 @@ export function InviteMemberModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-card border rounded-lg shadow-lg max-w-md w-full p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Invite Team Member</h2>
-          <button
-            onClick={onClose}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            ✕
-          </button>
-        </div>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Invite Team Member</DialogTitle>
+          <DialogDescription>
+            Send an invitation to join your team
+          </DialogDescription>
+        </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email Address</Label>
+            <Label htmlFor="email" className="text-xs">Email Address</Label>
             <Input
               id="email"
               type="email"
               placeholder="colleague@example.com"
-              className="h-10"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -82,10 +90,10 @@ export function InviteMemberModal({
             />
           </div>
 
-          <div className="space-y-2 w-full">
-            <Label htmlFor="role">Role</Label>
-            <Select value={role} onValueChange={(value) => setRole(value as "admin" | "member")} disabled={isLoading} >
-              <SelectTrigger id="role" className={'w-full h-10 text-sm'}>
+          <div className="space-y-2">
+            <Label htmlFor="role" className="text-xs">Role</Label>
+            <Select value={role} onValueChange={(value) => setRole(value as "admin" | "member")} disabled={isLoading}>
+              <SelectTrigger id="role" className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -100,22 +108,21 @@ export function InviteMemberModal({
             </p>
           </div>
 
-          <div className="flex gap-3 pt-2">
+          <DialogFooter>
             <Button
               type="button"
-              variant="outline"
-              onClick={onClose}
+              variant="ghost"
+              onClick={() => onOpenChange(false)}
               disabled={isLoading}
-              className="flex-1"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading} className="flex-1">
+            <Button type="submit" disabled={isLoading || !email}>
               {isLoading ? "Inviting..." : "Send Invitation"}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

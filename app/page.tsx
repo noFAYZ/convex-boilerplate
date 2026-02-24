@@ -93,16 +93,16 @@ export default function HomePage() {
             </p>
 
             <div className="flex gap-3 justify-center pt-2">
-              <Button size="lg" className="h-10 px-6 text-sm gap-2" asChild>
+              <Button       asChild>
                 <Link href="/register">
                   Get Started
                   <HugeiconsIcon icon={ArrowRight01Icon} className="h-3.5 w-3.5" />
                 </Link>
               </Button>
               <Button
-                size="lg"
+              
                 variant="outline"
-                className="h-10 px-6 text-sm"
+              
                 asChild
               >
                 <Link href="/login">Sign In</Link>

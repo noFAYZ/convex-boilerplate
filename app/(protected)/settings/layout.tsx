@@ -6,12 +6,14 @@ import { memo } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
-import { UserIcon, LockIcon, Building03Icon } from "@hugeicons/core-free-icons";
+import { UserIcon, LockIcon, Building03Icon, Activity01Icon, Wallet02Icon } from "@hugeicons/core-free-icons";
 
 const settingsNavigation: { name: string; href: string; icon: IconSvgElement }[] = [
   { name: "Profile", href: "/settings/profile", icon: UserIcon },
   { name: "Password", href: "/settings/password", icon: LockIcon },
   { name: "Organization", href: "/settings/organization", icon: Building03Icon },
+  { name: "Billing", href: "/settings/billing", icon: Wallet02Icon },
+  { name: "Activity", href: "/settings/activity", icon: Activity01Icon },
 ];
 
 const SettingsNavigation = memo(function SettingsNavigation({ pathname }: { pathname: string }) {

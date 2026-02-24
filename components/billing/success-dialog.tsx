@@ -12,8 +12,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
-import { SolarBillCheckBoldDuotone } from "@/components/icons/icons";
+import { LetsIconsCheckRingDuotone, PhSealCheckFill, SolarBillCheckBoldDuotone } from "@/components/icons/icons";
 import { PLANS, type PlanType } from "@/lib/plans";
+import { SealCheckIcon } from "@phosphor-icons/react";
 
 interface SuccessDialogProps {
   open: boolean;
@@ -47,8 +48,8 @@ const SuccessDialog = memo(function SuccessDialog({
           <>
             <DialogHeader className="space-y-4">
               <div className="flex justify-center">
-                <div className="rounded-lg bg-gradient-to-br from-lime-100 to-lime-100 dark:from-green-900/30 dark:to-emerald-900/30 p-3">
-                  <SolarBillCheckBoldDuotone className="h-12 w-12 text-lime-600 dark:text-green-400" />
+                <div className="rounded-full bg-gradient-to-br from-lime-100 to-lime-100 dark:from-green-900/30 dark:to-emerald-900/30 p-3">
+                  <PhSealCheckFill className="h-12 w-12 text-lime-600 dark:text-green-400" />
                 </div>
               </div>
               <div className="text-center space-y-2">
@@ -71,7 +72,7 @@ const SuccessDialog = memo(function SuccessDialog({
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                       Plan
                     </p>
-                    <Badge className="text-lg font-bold mt-1" variant="secondary">
+                    <Badge variant="premium" size={'xl'} className="mt-1">
                       {PLANS[currentPlan]?.name}
                     </Badge>
                   </div>
@@ -99,7 +100,7 @@ const SuccessDialog = memo(function SuccessDialog({
 
               {/* Features Card */}
               {currentPlan !== "free" && (
-                <div className="rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border border-blue-200/50 dark:border-blue-800/50 p-4">
+                <div className="rounded-lg   p-4">
                   <p className="text-sm font-semibold mb-3 text-blue-900 dark:text-blue-200">
                     You now have access to:
                   </p>
@@ -107,9 +108,10 @@ const SuccessDialog = memo(function SuccessDialog({
                     {PLANS[currentPlan]?.features?.slice(0, 3).map((feature, idx) => (
                       <li
                         key={idx}
-                        className="text-sm text-blue-800 dark:text-blue-300 flex items-start gap-2"
+                        className="text-sm flex items-start gap-2"
                       >
-                        <span className="text-blue-600 dark:text-blue-400 mt-0.5">✓</span>
+                      
+                        <LetsIconsCheckRingDuotone className="w-5.5 h-5.5 text-lime-700" />
                         {feature}
                       </li>
                     ))}

@@ -6,6 +6,8 @@ import { api } from "@/convex/_generated/api";
 import { normalizeImageUrl } from "@/lib/normalize-image-url";
 import { handleMutationError, handleMutationSuccess } from "@/lib/error-handler";
 import { Button } from "@/components/ui/button";
+import { LeaveDialog } from "./leave-dialog";
+import { RemoveDialog } from "./remove-dialog";
 import { Id } from "@/convex/_generated/dataModel";
 import { Badge } from "../ui/badge";
 
@@ -38,9 +40,12 @@ export function MembersList({
   const [loadingMemberId, setLoadingMemberId] = useState<Id<"members"> | null>(
     null
   );
+  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
+  const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
+  const [selectedMemberId, setSelectedMemberId] = useState<Id<"members"> | null>(null);
+  const [selectedMemberName, setSelectedMemberName] = useState<string>("");
 
   const updateRole = useMutation(api.members.updateRole);
-  const removeMember = useMutation(api.members.remove);
 
   const handleRoleChange = async (
     memberId: Id<"members">,
@@ -58,22 +63,19 @@ export function MembersList({
     }
   };
 
-  const handleRemove = async (memberId: Id<"members">, userName?: string) => {
-    const confirmed = confirm(
-      `Are you sure you want to remove ${userName || "this member"}?`
-    );
-    if (!confirmed) return;
-
-    setLoadingMemberId(memberId);
-    try {
-      await removeMember({ memberId });
-      handleMutationSuccess("Member removed successfully");
-      onUpdate?.();
-    } catch (error) {
-      handleMutationError(error);
-    } finally {
-      setLoadingMemberId(null);
+  const handleRemove = (memberId: Id<"members">, userName?: string, isCurrentUser: boolean = false) => {
+    setSelectedMemberId(memberId);
+    setSelectedMemberName(userName || "this member");
+    if (isCurrentUser) {
+      setLeaveDialogOpen(true);
+    } else {
+      setRemoveDialogOpen(true);
     }
+  };
+
+  const handleRemoveSuccess = () => {
+    setLoadingMemberId(null);
+    onUpdate?.();
   };
 
   const canManage = currentUserRole === "owner" || currentUserRole === "admin";
@@ -150,7 +152,7 @@ export function MembersList({
                 <Button
                   variant={isCurrentUser ? "delete" : "destructive"}
                   size="sm"
-                  onClick={() => handleRemove(member._id, member.user?.name)}
+                  onClick={() => handleRemove(member._id, member.user?.name, isCurrentUser)}
                   disabled={isLoading}
                 >
                   {isCurrentUser ? "Leave" : "Remove"}
@@ -160,6 +162,25 @@ export function MembersList({
           </div>
         );
       })}
+
+      {selectedMemberId && (
+        <>
+          <LeaveDialog
+            open={leaveDialogOpen}
+            onOpenChange={setLeaveDialogOpen}
+            memberId={selectedMemberId}
+            memberName={selectedMemberName}
+            onSuccess={handleRemoveSuccess}
+          />
+          <RemoveDialog
+            open={removeDialogOpen}
+            onOpenChange={setRemoveDialogOpen}
+            memberId={selectedMemberId}
+            memberName={selectedMemberName}
+            onSuccess={handleRemoveSuccess}
+          />
+        </>
+      )}
     </div>
   );
 }

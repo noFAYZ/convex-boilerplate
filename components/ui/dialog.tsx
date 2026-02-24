@@ -13,11 +13,12 @@ function Dialog({ ...props }: DialogPrimitive.Root.Props) {
 function DialogTrigger({
   className,
   children,
+  variant,
   ...props
 }: React.ComponentProps<typeof Button>) {
   return (
     <DialogPrimitive.Trigger
-      render={<Button className={cn(className)} {...props}>{children}</Button>}
+      render={<Button className={cn(className)} variant={variant} {...props}>{children}</Button>}
       data-slot="dialog-trigger"
     />
   )
@@ -128,14 +129,14 @@ function DialogDescription({
 
 function DialogClose({
   className,
-  variant = "outline",
+  variant = "ghost",
   size = "sm",
   ...props
 }: React.ComponentProps<typeof Button>) {
   return (
     <DialogPrimitive.Close
       data-slot="dialog-close"
-      render={<Button />}
+      render={<Button variant={variant} />}
       {...props}
     />
   )

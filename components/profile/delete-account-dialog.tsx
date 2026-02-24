@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Trash } from "@hugeicons/core-free-icons";
+import { TrashIcon } from "@phosphor-icons/react";
 
 interface DeleteAccountDialogProps {
   onDeleted?: () => void;
@@ -44,11 +45,11 @@ export function DeleteAccountDialog({ onDeleted }: DeleteAccountDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="delete" size="sm">
-          <HugeiconsIcon icon={Trash} className="h-3.5 w-3.5 mr-2" />
+      <DialogTrigger  variant="delete" size={'sm'} >
+   
+          <TrashIcon  className="h-3.5 w-3.5 mr-1" />
           Delete Account
-        </Button>
+  
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -61,7 +62,7 @@ export function DeleteAccountDialog({ onDeleted }: DeleteAccountDialogProps) {
         </DialogHeader>
 
         <DialogFooter>
-          <DialogClose disabled={loading}>Cancel</DialogClose>
+          <DialogClose disabled={loading} variant={'ghost'}>Cancel</DialogClose>
           <Button
             variant="destructive"
             onClick={handleDelete}
