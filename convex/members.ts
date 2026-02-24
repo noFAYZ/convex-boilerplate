@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
+import { api } from "./_generated/api";
 import { auth } from "./lib/auth";
 import { inviteRoleValidator, roleValidator } from "./schema";
 import {
@@ -98,6 +99,23 @@ export const invite = mutation({
       metadata: { email: args.email, role: args.role },
     });
 
+    // Notify invited user if they have an account
+    if (existingUser) {
+      const org = await ctx.db.get(args.organizationId);
+      const inviter = await ctx.db.get(userId);
+      // Create notification directly
+      await ctx.db.insert("notifications", {
+        userId: existingUser._id,
+        organizationId: args.organizationId,
+        type: "member_invited",
+        title: "You're invited to an organization",
+        message: `${inviter?.name || "Someone"} invited you to join ${org?.name || "an organization"}`,
+        read: false,
+        createdAt: Date.now(),
+        actorId: userId,
+      });
+    }
+
     return { invitationId, token };
   },
 });
@@ -163,6 +181,19 @@ export const acceptInvitation = mutation({
       metadata: { role: invitation.role },
     });
 
+    // Notify the inviter that invitation was accepted
+    const org = await ctx.db.get(invitation.organizationId);
+    await ctx.db.insert("notifications", {
+      userId: invitation.invitedBy,
+      organizationId: invitation.organizationId,
+      type: "member_joined",
+      title: "Member joined your organization",
+      message: `${user.name || "Someone"} accepted your invitation to ${org?.name || "your organization"}`,
+      read: false,
+      createdAt: Date.now(),
+      actorId: userId,
+    });
+
     return { organizationId: invitation.organizationId };
   },
 });
@@ -208,6 +239,19 @@ export const updateRole = mutation({
       },
     });
 
+    // Notify the member their role was changed
+    const org = await ctx.db.get(member.organizationId);
+    await ctx.db.insert("notifications", {
+      userId: member.userId,
+      organizationId: member.organizationId,
+      type: "role_changed",
+      title: "Your role was changed",
+      message: `Your role in ${org?.name || "the organization"} was changed to ${args.role}`,
+      read: false,
+      createdAt: Date.now(),
+      actorId: userId,
+    });
+
     return await ctx.db.get(args.memberId);
   },
 });
@@ -247,12 +291,15 @@ export const remove = mutation({
     }
 
     const targetUser = await ctx.db.get(member.userId);
+    const org = await ctx.db.get(member.organizationId);
+    const wasSelfRemoval = member.userId === userId;
+
     await ctx.db.delete(args.memberId);
 
     await logActivity(ctx, {
       organizationId: member.organizationId,
       userId,
-      action: member.userId === userId ? "member.left" : "member.removed",
+      action: wasSelfRemoval ? "member.left" : "member.removed",
       entityType: "member",
       entityId: args.memberId,
       metadata: {
@@ -261,6 +308,21 @@ export const remove = mutation({
         role: member.role,
       },
     });
+
+    // Notify member they were removed (only if removed by someone else)
+    if (!wasSelfRemoval) {
+      const remover = await ctx.db.get(userId);
+      await ctx.db.insert("notifications", {
+        userId: member.userId,
+        organizationId: member.organizationId,
+        type: "member_removed",
+        title: "You were removed from an organization",
+        message: `${remover?.name || "Someone"} removed you from ${org?.name || "the organization"}`,
+        read: false,
+        createdAt: Date.now(),
+        actorId: userId,
+      });
+    }
   },
 });
 

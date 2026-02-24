@@ -7,6 +7,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { handleMutationError, handleMutationSuccess } from "@/lib/error-handler";
 import { useCurrentMember } from "@/hooks/use-current-member";
+import { usePermissions } from "@/hooks/use-permissions";
 import { MemberList } from "@/components/organizations/member-list";
 import { NewOrgDialog } from "@/components/organizations/new-org-dialog";
 import { DeleteOrgDialog } from "@/components/organizations/delete-org-dialog";
@@ -37,19 +38,20 @@ export default function OrganizationSettingsPage() {
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
   const [isLeavingOrg, setIsLeavingOrg] = useState(false);
 
-  const currentMember = useCurrentMember(activeOrgId || (organizations?.[0]?._id as any));
-
-  const invitations = useQuery(
-    api.members.listInvitations,
-    activeOrgId ? { organizationId: activeOrgId } : "skip"
-  );
-
   const activeOrg = useMemo(() => {
     if (!organizations) return null;
     return activeOrgId
       ? organizations.find((o: any) => o._id === activeOrgId)
       : organizations[0];
   }, [organizations, activeOrgId]);
+
+  const currentMember = useCurrentMember(activeOrgId || (organizations?.[0]?._id as any));
+  const permissions = usePermissions(activeOrg?.role);
+
+  const invitations = useQuery(
+    api.members.listInvitations,
+    activeOrgId && permissions.canInvite ? { organizationId: activeOrgId } : "skip"
+  );
 
   useEffect(() => {
     if (organizations && organizations.length > 0 && !activeOrgId) {
@@ -191,7 +193,7 @@ export default function OrganizationSettingsPage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold">Members</h2>
-              <InviteMemberDialog organizationId={activeOrg._id} />
+              {permissions.canInvite && <InviteMemberDialog organizationId={activeOrg._id} />}
             </div>
             <MemberList organizationId={activeOrg._id} />
           </div>
@@ -199,7 +201,7 @@ export default function OrganizationSettingsPage() {
           <div className="h-px bg-border/20" />
 
           {/* Pending Invitations Section */}
-          {activeOrg.role === "owner" || activeOrg.role === "admin" ? (
+          {permissions.canInvite ? (
             <div className="space-y-4">
               <h2 className="text-sm font-semibold">Pending Invitations</h2>
               {invitations ? (
@@ -217,7 +219,7 @@ export default function OrganizationSettingsPage() {
 
           {/* Danger Zone */}
           <div className="space-y-4 rounded-lg border border-destructive/20 bg-destructive/5 p-4">
-            {activeOrg.role === "owner" ? (
+            {permissions.canDeleteOrg ? (
               <>
                 <h3 className="text-sm font-semibold text-destructive">
                   Danger Zone

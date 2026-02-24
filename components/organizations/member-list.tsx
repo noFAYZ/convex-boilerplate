@@ -7,6 +7,8 @@ import { Id } from "@/convex/_generated/dataModel";
 import { normalizeImageUrl } from "@/lib/normalize-image-url";
 import { handleMutationError, handleMutationSuccess } from "@/lib/error-handler";
 import { Button } from "@/components/ui/button";
+import { useCurrentMember } from "@/hooks/use-current-member";
+import { usePermissions } from "@/hooks/use-permissions";
 import {
   Select,
   SelectContent,
@@ -36,6 +38,9 @@ interface MemberRowProps {
   onRoleChange: (role: "owner" | "admin" | "member") => Promise<void>;
   onRemove: () => Promise<void>;
   isLoading?: boolean;
+  canChangeRole?: boolean;
+  canRemove?: boolean;
+  isCurrentUser?: boolean;
 }
 
 const MemberRow = React.memo(function MemberRow({
@@ -43,6 +48,9 @@ const MemberRow = React.memo(function MemberRow({
   onRoleChange,
   onRemove,
   isLoading,
+  canChangeRole = false,
+  canRemove = false,
+  isCurrentUser = false,
 }: MemberRowProps) {
   const handleRoleChange = useCallback(
     async (role: string) => {
@@ -81,7 +89,7 @@ const MemberRow = React.memo(function MemberRow({
         </div>
         <div className="min-w-0 flex-1">
           <div className="text-sm font-semibold truncate">
-            {member.user?.name}
+            {member.user?.name} {isCurrentUser && <span className="text-xs text-muted-foreground">(you)</span>}
           </div>
           <div className="text-xs text-muted-foreground truncate">
             {member.user?.email}
@@ -89,27 +97,35 @@ const MemberRow = React.memo(function MemberRow({
         </div>
       </div>
 
-      <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-        <Select value={member.role} onValueChange={handleRoleChange} disabled={isLoading}>
-          <SelectTrigger size="sm"  >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="owner">Owner</SelectItem>
-            <SelectItem value="admin">Admin</SelectItem>
-            <SelectItem value="member">Member</SelectItem>
-          </SelectContent>
-        </Select>
+      {(canChangeRole || canRemove) && (
+        <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+          {canChangeRole ? (
+            <Select value={member.role} onValueChange={handleRoleChange} disabled={isLoading || isCurrentUser}>
+              <SelectTrigger size="sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="owner">Owner</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
+                <SelectItem value="member">Member</SelectItem>
+              </SelectContent>
+            </Select>
+          ) : (
+            <div className="text-sm font-medium px-2 py-1">{member.role}</div>
+          )}
 
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={handleRemove}
-          disabled={isLoading}
-        >
-          Remove
-        </Button>
-      </div>
+          {canRemove && !isCurrentUser && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleRemove}
+              disabled={isLoading}
+            >
+              Remove
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 });
@@ -118,6 +134,8 @@ MemberRow.displayName = "MemberRow";
 
 export function MemberList({ organizationId }: MemberListProps) {
   const members = useQuery(api.members.list, { organizationId });
+  const currentMember = useCurrentMember(organizationId);
+  const permissions = usePermissions(currentMember?.role);
   const updateRole = useMutation(api.members.updateRole);
   const removeMember = useMutation(api.members.remove);
 
@@ -174,6 +192,9 @@ export function MemberList({ organizationId }: MemberListProps) {
           member={member}
           onRoleChange={handleRoleChange(member._id)}
           onRemove={handleRemoveMember(member._id)}
+          canChangeRole={permissions.canManageRoles}
+          canRemove={permissions.canRemoveMembers}
+          isCurrentUser={currentMember?.userId === member.userId}
         />
       ))}
     </div>

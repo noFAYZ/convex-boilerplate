@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "./sidebar-provider";
 import { ThemeSwitcher } from "@/components/ui/theme-switcher";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 interface NavItem {
   name: string;
@@ -165,9 +166,9 @@ export const Sidebar = memo(() => {
         <div className="px-3 py-4 flex items-center justify-between gap-2">
           <div className="flex-1 min-w-0">
             <OrgSwitcher />
-           
+            
           </div>
-
+<NotificationBell />
           <Button
             variant="ghost"
             size="icon"
@@ -195,23 +196,23 @@ export const Sidebar = memo(() => {
    
           <div className="flex items-center justify-between px-2 pt-2">
             <AuthButton isCollapsed={false} />
-           
-            <div className=" flex gap-3 items-center"> <ThemeSwitcher />
+
+            <div className="flex gap-3 items-center">
+          
+              <ThemeSwitcher />
               <Button
                 asChild
-                variant={  "outline"  }
-             className="rounded-full border-border/30 shadow-xs "
-                size={'icon'}
+                variant="outline"
+                className="rounded-full border-border/30 shadow-xs"
+                size="icon"
               >
                 <Link href="/settings/profile" className="flex w-8 h-8 items-center gap-3">
                   <HugeiconsIcon
                     icon={Settings01Icon}
                     className={cn(
                       "h-5 w-5 shrink-0 transition-transform duration-75",
-             
                     )}
                   />
-        
                 </Link>
               </Button>
             </div>

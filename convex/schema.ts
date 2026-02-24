@@ -102,6 +102,31 @@ const schema = defineSchema({
     .index("by_user", ["userId"])
     .index("by_polar_subscription_id", ["polarSubscriptionId"])
     .index("by_polar_customer_id", ["polarCustomerId"]),
+
+  emailVerifications: defineTable({
+    userId: v.id("users"),
+    code: v.string(),
+    expiresAt: v.number(),
+    createdAt: v.number(),
+  }).index("by_user", ["userId"]),
+
+  notifications: defineTable({
+    userId: v.id("users"),
+    organizationId: v.optional(v.id("organizations")),
+    type: v.union(
+      v.literal("member_invited"),
+      v.literal("member_joined"),
+      v.literal("role_changed"),
+      v.literal("member_removed")
+    ),
+    title: v.string(),
+    message: v.string(),
+    read: v.boolean(),
+    createdAt: v.number(),
+    actorId: v.optional(v.id("users")),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_and_read", ["userId", "read"]),
 });
 
 export default schema;

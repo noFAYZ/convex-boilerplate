@@ -6,6 +6,7 @@ import { OrgProvider } from "@/components/organizations/org-context";
 import { SidebarProvider } from "@/components/layout/sidebar-provider";
 import { Sidebar, SidebarToggle } from "@/components/layout/sidebar";
 import { GlobalLoadingOverlay } from "@/components/layout/global-loading-overlay";
+import { EmailVerificationBanner } from "@/components/auth/email-verification-banner";
 
 export default function ProtectedLayoutWrapper({
   children,
@@ -22,6 +23,9 @@ export default function ProtectedLayoutWrapper({
             <Sidebar />
 
             <div className="flex flex-col flex-1 overflow-hidden ">
+              {/* Email Verification Banner */}
+              <EmailVerificationBanner />
+
               {/* Mobile Header */}
               <header className="lg:hidden border-b bg-background/80 backdrop-blur-lg px-4 h-12 flex items-center gap-2.5 sticky top-0 z-30">
                 <SidebarToggle />
