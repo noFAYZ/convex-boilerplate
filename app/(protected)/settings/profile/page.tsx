@@ -12,11 +12,11 @@ import { handleMutationError, handleMutationSuccess } from "@/lib/error-handler"
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Loading01Icon, AlertCircleIcon } from "@hugeicons/core-free-icons";
+import { DeleteAccountDialog } from "@/components/profile/delete-account-dialog";
 
 export default function ProfileSettingsPage() {
   const currentUser = useQuery(api.users.getCurrent);
   const updateProfile = useMutation(api.users.update);
-  const deleteAccount = useMutation(api.users.deleteAccount);
 
   const [name, setName] = useState("");
   const [image, setImage] = useState("");
@@ -50,22 +50,6 @@ export default function ProfileSettingsPage() {
     }
   };
 
-  const handleDeleteAccount = async () => {
-    const confirmed = confirm(
-      "Are you sure you want to delete your account? This action cannot be undone."
-    );
-    if (!confirmed) return;
-
-    const doubleCheck = prompt('Type "DELETE" to confirm account deletion:');
-    if (doubleCheck !== "DELETE") return;
-
-    try {
-      await deleteAccount({});
-      handleMutationSuccess("Account deleted successfully");
-    } catch (error) {
-      handleMutationError(error);
-    }
-  };
 
   if (!currentUser) {
     return (
@@ -152,9 +136,7 @@ export default function ProfileSettingsPage() {
           <p className="text-sm text-muted-foreground">
             Permanently delete your account and all associated data. This action cannot be undone.
           </p>
-          <Button variant="delete" onClick={handleDeleteAccount}  size='sm'>
-            Delete Account
-          </Button>
+          <DeleteAccountDialog />
         </CardContent>
       </Card>
     </div>

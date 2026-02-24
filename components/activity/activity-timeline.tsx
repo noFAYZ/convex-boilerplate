@@ -4,16 +4,17 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { normalizeImageUrl } from "@/lib/normalize-image-url";
-import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import {
-  UserAdd01Icon,
-  UserMinus01Icon,
-  UserCheck01Icon,
-  SecurityCheckIcon,
-  File01Icon,
-  CameraIcon,
-} from "@hugeicons/core-free-icons";
+  UserPlus,
+  UserMinus,
+  CheckCircle2,
+  Shield,
+  FileText,
+  Camera,
+  Send
+} from "lucide-react";
 import { memo, useMemo } from "react";
+import { Card } from "../ui/card";
 
 const formatRelativeTime = (date: Date): string => {
   const now = new Date();
@@ -32,7 +33,7 @@ interface ActivityLog {
   timestamp: number;
   action: string;
   user?: { id?: string; name?: string; email?: string; image?: string } | null;
-  organization?: { id?: string; name?: string } | null;
+  organization?: { id?: string; name?: string; image?: string } | null;
   metadata?: Record<string, string | undefined>;
 }
 
@@ -42,43 +43,55 @@ interface GroupedActivity {
 }
 
 interface ActivityTimelineProps {
-  organizationId?: Id<"organizations">;
+  organizationId: Id<"organizations">;
   limit?: number;
 }
 
 type ActionType = "invite" | "join" | "remove" | "role" | "profile" | "default";
 
 interface ActivityIconConfig {
-  icon: IconSvgElement;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
   type: ActionType;
+  bgColor: string;
+  textColor: string;
 }
 
-const ACTIVITY_TYPE_COLORS: Record<ActionType, string> = {
-  invite: "bg-blue-500",
-  join: "bg-green-600",
-  remove: "bg-red-600",
-  role: "bg-amber-500",
-  profile: "bg-pink-500",
-  default: "bg-gray-500",
+const ACTIVITY_TYPE_CONFIG: Record<ActionType, { bg: string; text: string }> = {
+  invite: { bg: "bg-blue-200 dark:bg-blue-950", text: "text-blue-800 dark:text-blue-400" },
+  join: { bg: "bg-green-100 dark:bg-green-950", text: "text-green-600 dark:text-green-400" },
+  remove: { bg: "bg-red-100 dark:bg-red-950", text: "text-red-600 dark:text-red-400" },
+  role: { bg: "bg-amber-100 dark:bg-amber-950", text: "text-amber-600 dark:text-amber-400" },
+  profile: { bg: "bg-pink-100 dark:bg-pink-950", text: "text-pink-600 dark:text-pink-400" },
+  default: { bg: "bg-gray-100 dark:bg-gray-950", text: "text-gray-600 dark:text-gray-400" },
 };
 
 const getActivityIcon = (action: string): ActivityIconConfig => {
+  const getConfig = (
+    type: ActionType,
+    iconComponent: React.ComponentType<{ size?: number; className?: string }>
+  ) => ({
+    icon: iconComponent,
+    type,
+    bgColor: ACTIVITY_TYPE_CONFIG[type].bg,
+    textColor: ACTIVITY_TYPE_CONFIG[type].text,
+  });
+
   if (action.includes("invited")) {
-    return { icon: UserAdd01Icon, type: "invite" };
+    return getConfig("invite", Send);
   }
   if (action.includes("joined")) {
-    return { icon: UserCheck01Icon, type: "join" };
+    return getConfig("join", CheckCircle2);
   }
   if (action.includes("removed") || action.includes("left")) {
-    return { icon: UserMinus01Icon, type: "remove" };
+    return getConfig("remove", UserMinus);
   }
   if (action.includes("role")) {
-    return { icon: SecurityCheckIcon, type: "role" };
+    return getConfig("role", Shield);
   }
   if (action.includes("avatar") || action.includes("profile")) {
-    return { icon: CameraIcon, type: "profile" };
+    return getConfig("profile", Camera);
   }
-  return { icon: File01Icon, type: "default" };
+  return getConfig("default", FileText);
 };
 
 const getActionText = (
@@ -132,7 +145,7 @@ function EmptyState({ organizationId }: { organizationId?: Id<"organizations"> }
   return (
     <div className="flex flex-col items-center justify-center py-16 px-4">
       <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted/50">
-        <HugeiconsIcon icon={File01Icon} className="h-6 w-6 text-muted-foreground/50" />
+        <FileText size={24} className="text-muted-foreground/50" />
       </div>
       <p className="text-sm font-medium text-foreground">No activity yet</p>
       <p className="mt-1 text-xs text-muted-foreground">
@@ -144,77 +157,91 @@ function EmptyState({ organizationId }: { organizationId?: Id<"organizations"> }
   );
 }
 
-function ActivityCard({
+function ActivityItem({
   log,
+  icon: IconComponent,
+  bgColor,
+  textColor,
+  isFirst,
   isLast,
-  type,
-  icon,
-  showOrganization,
 }: {
   log: ActivityLog;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  bgColor: string;
+  textColor: string;
+  isFirst: boolean;
   isLast: boolean;
-  type: ActionType;
-  icon: IconSvgElement;
-  showOrganization: boolean;
 }) {
   const timestamp = new Date(log.timestamp);
-  const initials =
-    log.user?.name
-      ?.split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase() ?? "U";
 
-  const bgColor = ACTIVITY_TYPE_COLORS[type];
 
   return (
-    <div className="relative pl-8">
-      {/* Timeline connector line */}
-      {!isLast && <div className="absolute left-3 top-6 h-10 w-px bg-border" />}
+    <div className="relative pb-6 last:pb-0 mx-auto">
+      {/* Vertical timeline line - connects to next item */}
+      {!isLast && (
+        <div className="absolute left-4 top-10 h-[calc(100%+24px)] w-px bg-black/20" />
+      )}
 
-      {/* Timeline dot with avatar or initials */}
-      <div className="absolute -left-1 top-1.5 flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border-2 border-background bg-background">
-        {log.user?.image ? (
-          <img
-            src={normalizeImageUrl(log.user.image) || ""}
-            alt={log.user?.name || "User"}
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div
-            className={`flex h-full w-full items-center justify-center text-xs font-semibold text-white ${bgColor}`}
-          >
-            {initials}
-          </div>
-        )}
-      </div>
+      <div className="group/item flex gap-4">
+        {/* Timeline icon badge */}
+        <div
+          className={`flex h-8 w-8 items-center justify-center rounded-full flex-shrink-0 ${bgColor} ring-3 ring-background relative z-10`}
+        >
+          <IconComponent size={18} className={textColor} />
+        </div>
 
-      {/* Activity content */}
-      <div className="overflow-hidden rounded-lg border border-border bg-card transition-colors hover:bg-muted/30">
-        <div className="space-y-2 p-3">
-          {/* Action text */}
-          <p className="text-sm leading-snug text-foreground">
-            <span className="font-medium">{log.user?.name ?? "Someone"}</span>
-            {" "}
-            <span className="text-muted-foreground">
-              {getActionText(log.action, log.metadata)}
+        {/* Content area */}
+        <div className="flex-1 min-w-0 pt-0.5">
+          <div className="text-sm text-foreground items-center flex gap-1 ">
+                {/* User avatar + name */}
+                <span className="inline-flex items-center px-1 py-0.5 gap-1.5 border rounded-full ">
+                  <div className="h-5 w-5 rounded-full bg-primary/10    flex-shrink-0 overflow-hidden">
+                    {log.user?.image ? (
+                      <img
+                        src={normalizeImageUrl(log.user.image) || ""}
+                        alt={log.user?.name || "User"}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-xs font-medium text-primary">
+                        {log.user?.name?.[0]?.toUpperCase() || "?"}
+                      </span>
+                    )}
+                  </div>
+                  <span className="font-semibold text-xs">{log.user?.name ?? "Someone"}</span>
+                </span>
+                {" "}
+                {/* Action text */}
+                <span className="text-muted-foreground font-normal items-start">
+                  {getActionText(log.action, log.metadata)}
+                </span>
+                {/* Organization with avatar */}
+                {log.organization && (
+                  <>
+                    {" in "}
+                    <span className="inline-flex items-center rounded-full  px-1 py-0.5 gap-1.5 border">
+                      <div className="h-4 w-4 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        {log.organization.image ? (
+                          <img
+                            src={normalizeImageUrl(log.organization.image) || ""}
+                            alt={log.organization?.name || "Organization"}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-[10px] font-semibold text-primary">
+                            {log.organization?.name?.[0]?.toUpperCase() || "?"}
+                          </span>
+                        )}
+                      </div>
+                      <span className="font-medium">{log.organization.name}</span>
+                    </span>
+                  </>
+                )}
+            {/* Relative time */}
+            <span className="text-muted-foreground text-xs font-semibold">
+              {" · "}
+              {formatRelativeTime(timestamp)}
             </span>
-          </p>
-
-          {/* Organization context (if applicable) */}
-          {showOrganization && log.organization && (
-            <p className="text-xs text-muted-foreground">
-              in <span className="font-medium text-foreground">{log.organization.name}</span>
-            </p>
-          )}
-
-          {/* Timestamp */}
-          <div className="flex items-center gap-2 pt-1 text-xs text-muted-foreground">
-            <time dateTime={new Date(log.timestamp).toISOString()}>
-              {formatTime(timestamp)}
-            </time>
-            <span className="text-border">·</span>
-            <span>{formatRelativeTime(timestamp)}</span>
           </div>
         </div>
       </div>
@@ -226,15 +253,12 @@ export const ActivityTimeline = memo(function ActivityTimeline({
   organizationId,
   limit = 50,
 }: ActivityTimelineProps) {
-  const activity = useQuery(
-    organizationId ? api.activity.list : api.activity.getRecent,
-    organizationId ? { organizationId, limit } : { limit }
-  );
+  const activity = useQuery(api.activity.list, { organizationId, limit });
 
   const groupedActivities = useMemo(() => {
     if (!activity?.length) return [];
 
-    return activity.reduce((acc: GroupedActivity[], log) => {
+    return activity.reduce((acc: GroupedActivity[], log: any) => {
       const date = new Date(log.timestamp);
       const dateKey = formatDate(date);
 
@@ -256,42 +280,33 @@ export const ActivityTimeline = memo(function ActivityTimeline({
     return <EmptyState organizationId={organizationId} />;
   }
 
+
   return (
-    <div className="space-y-8">
-      {groupedActivities.map((group, groupIndex) => (
+    <Card className="space-y-0">
+      {groupedActivities.map((group: any, groupIndex: number) => (
         <div key={group.date}>
-          {/* Date separator */}
-          <div className="mb-6 flex items-center gap-3">
-            <div className="h-px flex-1 bg-border" />
-            <time className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              {group.date}
-            </time>
-            <div className="h-px flex-1 bg-border" />
-          </div>
+          {group.activities.map((log: any, index: number) => {
+            const { icon, bgColor, textColor } = getActivityIcon(log.action);
+            const isFirst = groupIndex === 0 && index === 0;
+            const isLast =
+              groupIndex === groupedActivities.length - 1 &&
+              index === group.activities.length - 1;
 
-          {/* Activities list */}
-          <div className="space-y-0">
-            {group.activities.map((log, index) => {
-              const { icon, type } = getActivityIcon(log.action);
-              const isLast =
-                index === group.activities.length - 1 &&
-                groupIndex === groupedActivities.length - 1;
-
-              return (
-                <ActivityCard
-                  key={log._id}
-                  log={log}
-                  isLast={isLast}
-                  type={type}
-                  icon={icon}
-                  showOrganization={!organizationId}
-                />
-              );
-            })}
-          </div>
+            return (
+              <ActivityItem
+                key={log._id}
+                log={log}
+                icon={icon}
+                bgColor={bgColor}
+                textColor={textColor}
+                isFirst={isFirst}
+                isLast={isLast}
+              />
+            );
+          })}
         </div>
       ))}
-    </div>
+    </Card>
   );
 });
 

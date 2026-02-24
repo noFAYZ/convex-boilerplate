@@ -1,9 +1,18 @@
 import { v } from "convex/values";
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalQuery } from "./_generated/server";
 import { auth } from "./lib/auth";
 import { logActivity } from "./lib/helpers";
 
 export const getCurrent = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await auth.getUserId(ctx);
+    if (!userId) return null;
+    return await ctx.db.get(userId);
+  },
+});
+
+export const getCurrentInternal = internalQuery({
   args: {},
   handler: async (ctx) => {
     const userId = await auth.getUserId(ctx);
@@ -69,6 +78,16 @@ export const getByEmail = query({
       .query("users")
       .withIndex("email", (q) => q.eq("email", args.email))
       .first();
+  },
+});
+
+export const getByEmailInternal = internalQuery({
+  args: { email: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("users")
+      .withIndex("email", (q) => q.eq("email", args.email))
+      .collect();
   },
 });
 

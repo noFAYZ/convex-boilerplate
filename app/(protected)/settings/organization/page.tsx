@@ -1,9 +1,12 @@
 "use client";
 
 import { useCallback, useState, useMemo, useEffect } from "react";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
+import { useRouter } from "next/navigation";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { handleMutationError, handleMutationSuccess } from "@/lib/error-handler";
+import { useCurrentMember } from "@/hooks/use-current-member";
 import { MemberList } from "@/components/organizations/member-list";
 import { NewOrgDialog } from "@/components/organizations/new-org-dialog";
 import { DeleteOrgDialog } from "@/components/organizations/delete-org-dialog";
@@ -13,14 +16,29 @@ import { InvitationList } from "@/components/organizations/invitation-list";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Building03Icon } from "@hugeicons/core-free-icons";
+import { Building03Icon, LogoutCircleIcon } from "@hugeicons/core-free-icons";
 import { Card } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function OrganizationSettingsPage() {
+  const router = useRouter();
   const organizations = useQuery(api.organizations.list);
+  const removeMember = useMutation(api.members.remove);
   const [activeOrgId, setActiveOrgId] = useState<Id<"organizations"> | null>(
     null
   );
+  const [showLeaveDialog, setShowLeaveDialog] = useState(false);
+  const [isLeavingOrg, setIsLeavingOrg] = useState(false);
+
+  const currentMember = useCurrentMember(activeOrgId || (organizations?.[0]?._id as any));
 
   const invitations = useQuery(
     api.members.listInvitations,
@@ -30,24 +48,50 @@ export default function OrganizationSettingsPage() {
   const activeOrg = useMemo(() => {
     if (!organizations) return null;
     return activeOrgId
-      ? organizations.find((o) => o._id === activeOrgId)
+      ? organizations.find((o: any) => o._id === activeOrgId)
       : organizations[0];
   }, [organizations, activeOrgId]);
 
   useEffect(() => {
     if (organizations && organizations.length > 0 && !activeOrgId) {
-      setActiveOrgId(organizations[0]._id);
+      setActiveOrgId(organizations[0]!._id);
     }
   }, [organizations, activeOrgId]);
 
   const handleOrgDeleted = useCallback(() => {
     if (organizations && organizations.length > 1) {
-      const nextOrg = organizations.find((o) => o._id !== activeOrgId);
+      const nextOrg = organizations.find((o: any) => o._id !== activeOrgId);
       if (nextOrg) setActiveOrgId(nextOrg._id);
     } else {
       setActiveOrgId(null);
     }
   }, [organizations, activeOrgId]);
+
+  const handleLeaveOrganization = useCallback(async () => {
+    if (!activeOrg || !currentMember) return;
+
+    setIsLeavingOrg(true);
+    try {
+      await removeMember({ memberId: currentMember._id });
+      handleMutationSuccess("Left organization successfully");
+      setShowLeaveDialog(false);
+
+      // Refresh and switch to another org if available
+      setTimeout(() => {
+        if (organizations && organizations.length > 1) {
+          const nextOrg = organizations.find((o: any) => o._id !== activeOrgId);
+          if (nextOrg) setActiveOrgId(nextOrg._id);
+        } else {
+          setActiveOrgId(null);
+        }
+        router.refresh();
+      }, 500);
+    } catch (error) {
+      handleMutationError(error, "Failed to leave organization");
+    } finally {
+      setIsLeavingOrg(false);
+    }
+  }, [activeOrg, currentMember, activeOrgId, organizations, removeMember, router]);
 
   if (!organizations) {
     return (
@@ -92,7 +136,7 @@ export default function OrganizationSettingsPage() {
         </div>
 
         <div className="space-y-1.5">
-          {organizations.map((org) => {
+          {organizations.map((org: any) => {
             const isActive = activeOrgId === org._id;
 
             return (
@@ -173,22 +217,64 @@ export default function OrganizationSettingsPage() {
           ) : null}
 
           {/* Danger Zone */}
-          {activeOrg.role === "owner" && (
-            <div className="space-y-2 rounded-lg border border-destructive/30  p-4">
-              <h3 className="text-sm font-semibold text-destructive">
-                Danger Zone
-              </h3>
-              <p className="text-xs text-muted-foreground">
-                Permanently delete this organization and all associated data.
-                This action cannot be undone.
-              </p>
-              <DeleteOrgDialog
-                orgId={activeOrg._id}
-                orgName={activeOrg.name}
-                onDeleted={handleOrgDeleted}
-              />
-            </div>
-          )}
+          <div className="space-y-4 rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+            {activeOrg.role === "owner" ? (
+              <>
+                <h3 className="text-sm font-semibold text-destructive">
+                  Danger Zone
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Permanently delete this organization and all associated data.
+                  This action cannot be undone.
+                </p>
+                <DeleteOrgDialog
+                  orgId={activeOrg._id}
+                  orgName={activeOrg.name}
+                  onDeleted={handleOrgDeleted}
+                />
+              </>
+            ) : (
+              <>
+                <h3 className="text-sm font-semibold text-destructive">
+                  Leave Organization
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  You will no longer have access to this organization and its data.
+                </p>
+                <AlertDialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setShowLeaveDialog(true)}
+                    disabled={isLeavingOrg}
+                  >
+                    <HugeiconsIcon icon={LogoutCircleIcon} className="mr-2 h-4 w-4" />
+                    Leave Organization
+                  </Button>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Leave Organization?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to leave <strong>{activeOrg.name}</strong>? You will no longer have access to this organization and its data.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <div className="flex gap-2 justify-end">
+                      <AlertDialogCancel disabled={isLeavingOrg}>
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleLeaveOrganization}
+                        disabled={isLeavingOrg}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {isLeavingOrg ? "Leaving..." : "Leave"}
+                      </AlertDialogAction>
+                    </div>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </>
+            )}
+          </div>
         </div>
       )}
     </Card>

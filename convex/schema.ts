@@ -82,6 +82,26 @@ const schema = defineSchema({
     .index("by_organization", ["organizationId"])
     .index("by_user", ["userId"])
     .index("by_organization_and_timestamp", ["organizationId", "timestamp"]),
+
+  subscriptions: defineTable({
+    userId: v.id("users"),
+    polarSubscriptionId: v.string(),
+    polarCustomerId: v.string(),
+    plan: v.union(v.literal("free"), v.literal("pro"), v.literal("enterprise")),
+    status: v.union(
+      v.literal("active"),
+      v.literal("canceled"),
+      v.literal("past_due"),
+      v.literal("incomplete")
+    ),
+    currentPeriodEnd: v.number(),
+    cancelAtPeriodEnd: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_polar_subscription_id", ["polarSubscriptionId"])
+    .index("by_polar_customer_id", ["polarCustomerId"]),
 });
 
 export default schema;

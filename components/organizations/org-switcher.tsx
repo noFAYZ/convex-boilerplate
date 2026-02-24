@@ -51,12 +51,10 @@ export function OrgSwitcher() {
       }}
     >
       <SelectTrigger
-        className="w-full h-10  px-2 py-2 rounded border transition-all hover:bg-background"
+        className="w-full rounded border transition-all"
         style={{
-          borderColor: `var(--sidebar-border)`,
-         
- 
-        }}
+          borderColor: `var(--sidebar-border)`,}}
+          size="md"
       >
         <div className="flex items-center gap-2 flex-1 min-w-0">
           {currentOrganization?.logo ? (

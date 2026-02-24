@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthActions } from "@convex-dev/auth/react";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,21 +16,39 @@ import { Loading01Icon } from "@hugeicons/core-free-icons";
 export function LoginForm() {
   const router = useRouter();
   const { signIn } = useAuthActions();
+  const currentUser = useQuery(api.users.getCurrent);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
+  const [hasShownToast, setHasShownToast] = useState(false);
+
+  useEffect(() => {
+    if (currentUser && !hasShownToast) {
+      toast.info("You're already logged in", "Redirecting to dashboard...");
+      setHasShownToast(true);
+      router.push("/dashboard");
+    }
+  }, [currentUser, hasShownToast, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (currentUser) {
+      toast.info("You're already logged in", "Redirecting to dashboard...");
+      router.push("/dashboard");
+      return;
+    }
 
     startTransition(async () => {
       try {
         await signIn("password", { email, password, flow: "signIn" });
         router.push("/dashboard");
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to sign in");
+        const errorMessage = err instanceof Error ? err.message : "Failed to sign in";
+        setError(errorMessage);
+        toast.error("Sign in failed", errorMessage);
       }
     });
   };

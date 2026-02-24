@@ -1,12 +1,26 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono,DM_Sans } from "next/font/google";
+import { Geist, Geist_Mono,DM_Sans, Space_Grotesk, Work_Sans, Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 import { ConvexClientProvider } from "@/components/providers/convex-provider";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/toaster";
 import localFont from 'next/font/local'
 
-const geistSans = DM_Sans({
+const geistSans = Bricolage_Grotesque({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+  weight:["300","400","500"],
+  preload: true,
+  
+});
+
+
+export const metadata: Metadata = {
+  title: "Convex Boilerplate",
+  description: "Next.js boilerplate with Convex and authentication",
+};
+
+/* const geistSans2 = Space_Grotesk({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
@@ -16,15 +30,21 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Convex Boilerplate",
-  description: "Next.js boilerplate with Convex and authentication",
-};
-
 const myFont2 = localFont({
   src: [
     {
       path: '../public/fonts/matter/Matter-Regular.otf',
+      weight: '500',
+    },
+  ],
+  variable: '--font-archia',
+  display: 'swap',
+})
+
+const myFont3 = localFont({
+  src: [
+    {
+      path: '../public/fonts/fsmgro.ttf',
       weight: '500',
     },
   ],
@@ -41,7 +61,7 @@ const myFont4 = localFont({
   ],
   variable: '--font-archia',
   display: 'swap',
-})
+}) */
 
 export default function RootLayout({
   children,
@@ -50,7 +70,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body  className={`${myFont4.className}  antialiased`}  >
+      <body  className={`${geistSans.className}  antialiased`}  >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ConvexClientProvider>{children}</ConvexClientProvider>
           <Toaster />

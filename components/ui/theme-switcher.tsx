@@ -28,7 +28,7 @@ function ThemeSwitcher() {
         disabled
         className={cn(
           "shadow-md rounded-full",
-          "border border-divider",
+          "border border-none",
           "group relative",
         )}
         size="sm"
@@ -46,7 +46,7 @@ function ThemeSwitcher() {
       data-slot="theme-switcher"
       className={cn(
         "relative shadow-none rounded-full w-8 h-8",
-        "border  justify-center",
+        "border-border/30  justify-center",
         "group",
       )}
       size="icon"

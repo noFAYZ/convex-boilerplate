@@ -25,7 +25,7 @@ export default function TeamPage() {
     currentOrganization ? { organizationId: currentOrganization._id } : "skip"
   );
 
-  const currentMember = members?.find((m) => m.userId === currentUser?._id);
+  const currentMember = members?.find((m: any) => m.userId === currentUser?._id);
   const currentUserRole = currentMember?.role || "member";
   const canInvite = currentUserRole === "owner" || currentUserRole === "admin";
 
@@ -130,7 +130,7 @@ export default function TeamPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-0.5">
-              {invitations.map((invitation) => (
+              {invitations.map((invitation: any) => (
                 <div
                   key={invitation._id}
                   className="flex items-center justify-between p-3 rounded-md hover:bg-accent transition-colors"

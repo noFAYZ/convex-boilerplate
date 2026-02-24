@@ -158,7 +158,7 @@ export default function DashboardPage() {
           <CardContent>
             {recentActivity && recentActivity.length > 0 ? (
               <div className="space-y-0.5">
-                {recentActivity.slice(0, 5).map((activity) => (
+                {recentActivity.slice(0, 5).map((activity: any) => (
                   <div
                     key={activity._id}
                     className="flex items-start gap-3 p-2.5 rounded-md hover:bg-accent transition-colors"

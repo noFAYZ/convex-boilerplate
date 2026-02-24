@@ -24,11 +24,10 @@ export function AuthButton({ isCollapsed = false }: AuthButtonProps) {
 
   // User is authenticated
   if (currentUser) {
-    return isCollapsed ? (
+    return !isCollapsed ? (
       <Button
-        variant="outline"
+        variant="destructive"
         size="icon"
-        className="w-10 h-10"
         onClick={() => void signOut()}
         title="Sign Out"
       >
@@ -39,7 +38,7 @@ export function AuthButton({ isCollapsed = false }: AuthButtonProps) {
         variant="outline"
         size="sm"
         onClick={() => void signOut()}
-        className="w-full"
+
       >
         Sign Out
       </Button>
@@ -60,11 +59,11 @@ export function AuthButton({ isCollapsed = false }: AuthButtonProps) {
       </Link>
     </Button>
   ) : (
-    <div className="space-y-2 w-full">
-      <Button variant="ghost" size="sm" asChild className="w-full">
+    <div className=" w-full flex items-center ">
+      <Button variant="ghost" size="sm"  asChild  >
         <Link href="/login">Sign In</Link>
       </Button>
-      <Button size="sm" asChild className="w-full">
+      <Button   asChild size="sm" >
         <Link href="/register">Sign Up</Link>
       </Button>
     </div>

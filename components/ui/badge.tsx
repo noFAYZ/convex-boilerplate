@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const badgeVariants = cva(
-  "h-5 gap-1 rounded-full border border-transparent px-1.5 py-0.5 text-[0.625rem] font-medium transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-2.5! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge",
+  "gap-1 rounded-full border border-transparent font-medium transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:pointer-events-none inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 overflow-hidden group/badge",
   {
     variants: {
       variant: {
@@ -27,7 +27,6 @@ const badgeVariants = cva(
         link:
           "text-primary underline-offset-4 hover:underline",
 
-        // ✅ NEW STATUS VARIANTS
         success:
           "bg-lime-600 text-white font-semibold dark:text-emerald-400 [a]:hover:bg-emerald-500/20 border-emerald-500/20",
 
@@ -42,17 +41,34 @@ const badgeVariants = cva(
 
         pending:
           "bg-purple-500/10 text-purple-600 dark:text-purple-400 [a]:hover:bg-purple-500/20 border-purple-500/20",
+
+        premium:
+          "bg-gradient-to-r from-amber-500 via-primary-500 to-amber-400 text-black font-semibold border-yellow-500/30 shadow",
+
+        new:
+          "bg-emerald-500 text-white font-semibold animate-pulse [a]:hover:bg-emerald-600 border-emerald-500/30",
+      },
+
+      size: {
+        xs: "h-4 px-1 text-[0.55rem] [&>svg]:size-2",
+        sm: "h-5 px-1.5 py-0.5 text-[0.625rem] [&>svg]:size-2.5",
+        md: "h-6 px-2 text-xs [&>svg]:size-3",
+        lg: "h-7 px-2.5 text-sm [&>svg]:size-3.5",
+        xl: "h-8 px-2.5 text-md [&>svg]:size-4",
       },
     },
+
     defaultVariants: {
       variant: "default",
+      size: "sm",
     },
   }
 )
 
 function Badge({
   className,
-  variant = "default",
+  variant,
+  size,
   render,
   ...props
 }: useRender.ComponentProps<"span"> &
@@ -61,7 +77,7 @@ function Badge({
     defaultTagName: "span",
     props: mergeProps<"span">(
       {
-        className: cn(badgeVariants({ variant }), className),
+        className: cn(badgeVariants({ variant, size }), className),
       },
       props
     ),
@@ -69,6 +85,7 @@ function Badge({
     state: {
       slot: "badge",
       variant,
+      size,
     },
   })
 }

@@ -11,10 +11,19 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/80 border-primary",
-        outline: "border-border dark:bg-input/30 hover:bg-accent/50 bg-card hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
-        ghost: "hover:bg-background hover:text-foreground dark:hover:bg-muted aria-expanded:bg-muted aria-expanded:text-foreground",
+        default: `
+  bg-gradient-to-br
+  from-primary/50 via-orange-400 to-orange-600
+  text-white
+  border-orange-400
+  shadow-[0_1px_2px_rgba(0,0,0,0.15)]
+  hover:brightness-105
+  active:brightness-95
+  focus-visible:ring-orange-400/40
+`,
+        outline: "border-border dark:bg-input/30 hover:bg-muted bg-card   shadow-[0_1px_2px_rgba(0,0,0,0.15)] hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground",
+        secondary: "bg-gradient-to-br from-secondary/90 via-secondary to-secondary/70 text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground border-[#CAF1D7]",
+        ghost: "hover:bg-muted hover:text-foreground dark:hover:bg-muted aria-expanded:bg-muted aria-expanded:text-foreground",
         destructive: "bg-destructive/10 hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/20 text-destructive focus-visible:border-destructive/40 dark:hover:bg-destructive/30",
         link: "text-primary underline-offset-4 hover:underline",
         delete: "bg-destructive hover:bg-destructive/80 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/20 text-white focus-visible:border-destructive/40 dark:hover:bg-destructive/30",
@@ -23,7 +32,7 @@ const buttonVariants = cva(
         xs: "h-6 gap-1 px-2 text-xs/relaxed has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5",
         sm: "h-7 gap-1 px-2 text-xs/relaxed has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-4",
         md: "h-8 gap-1 px-2.5 text-sm/relaxed has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-4.5",
-        default: "h-9 gap-1 px-3 text-sm/relaxed has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-5",
+        default: "h-8 gap-1 px-2.5 text-sm/relaxed has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-5",
         lg: "h-10 gap-1 px-3 text-base/relaxed has-data-[icon=inline-end]:pr-2.5 has-data-[icon=inline-start]:pl-2.5 [&_svg:not([class*='size-'])]:size-4.5",
         xl: "h-12 gap-2 px-4 text-base/relaxed has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3 [&_svg:not([class*='size-'])]:size-5",
         icon: "size-7 [&_svg:not([class*='size-'])]:size-3.5",

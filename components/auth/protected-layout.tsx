@@ -25,6 +25,7 @@ export function ProtectedLayout({ children }: { children: React.ReactNode }) {
 
     // Redirect to onboarding if not completed (and not already on onboarding page)
     if (
+      onboardingStatus &&
       !onboardingStatus.hasCompletedOnboarding &&
       pathname !== "/onboarding"
     ) {
@@ -48,7 +49,7 @@ export function ProtectedLayout({ children }: { children: React.ReactNode }) {
   // Show loading while redirecting
   if (
     currentUser === null ||
-    (!onboardingStatus.hasCompletedOnboarding && pathname !== "/onboarding")
+    (onboardingStatus && !onboardingStatus.hasCompletedOnboarding && pathname !== "/onboarding")
   ) {
     return (
       <div className="flex items-center justify-center min-h-screen">

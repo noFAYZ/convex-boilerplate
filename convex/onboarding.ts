@@ -1,6 +1,7 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, action, internalQuery } from "./_generated/server";
 import { auth } from "./lib/auth";
+import { internal } from "./_generated/api";
 
 export const getStatus = query({
   args: {},
@@ -78,7 +79,18 @@ export const complete = mutation({
   },
 });
 
-export const generateSlug = query({
+export const checkSlugExists = internalQuery({
+  args: { slug: v.string() },
+  handler: async (ctx, args) => {
+    const existingOrg = await ctx.db
+      .query("organizations")
+      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
+      .first();
+    return !!existingOrg;
+  },
+});
+
+export const generateSlug = action({
   args: { name: v.string() },
   handler: async (ctx, args) => {
     let slug = args.name
@@ -88,12 +100,9 @@ export const generateSlug = query({
       .replace(/-+/g, "-")
       .replace(/^-|-$/g, "");
 
-    const existingOrg = await ctx.db
-      .query("organizations")
-      .withIndex("by_slug", (q) => q.eq("slug", slug))
-      .first();
+    const exists = await ctx.runQuery(internal.onboarding.checkSlugExists, { slug });
 
-    if (existingOrg) {
+    if (exists) {
       const randomSuffix = Math.random().toString(36).substring(2, 6);
       slug = `${slug}-${randomSuffix}`;
     }

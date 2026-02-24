@@ -18,12 +18,17 @@ interface ActivityFeedProps {
 }
 
 export function ActivityFeed({ organizationId, limit = 20 }: ActivityFeedProps) {
-  const activity = useQuery(
-    organizationId
-      ? api.activity.list
-      : api.activity.getRecent,
-    organizationId ? { organizationId, limit } : { limit }
+  const listActivity = useQuery(
+    api.activity.list,
+    organizationId ? { organizationId, limit } : "skip"
   );
+
+  const recentActivity = useQuery(
+    api.activity.getRecent,
+    !organizationId ? { limit } : "skip"
+  );
+
+  const activity = organizationId ? listActivity : recentActivity;
 
   if (activity === undefined) {
     return (
@@ -72,7 +77,7 @@ export function ActivityFeed({ organizationId, limit = 20 }: ActivityFeedProps) 
 
   return (
     <div className="space-y-0.5">
-      {activity.map((log) => {
+      {activity.map((log: any) => {
         const actionIcon = getActionIcon(log.action);
 
         return (

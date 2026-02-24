@@ -1,7 +1,7 @@
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Loading01Icon } from "@hugeicons/core-free-icons";
 import { cn } from "@/lib/utils";
-import { SvgSpinnersTadpole } from "../icons/icons";
+import { SvgSpinnersGooeyBalls1, SvgSpinnersTadpole } from "../icons/icons";
 
 interface LoadingProps {
   className?: string;
@@ -19,7 +19,7 @@ export function Loading({ className, text = "Loading...", size = "md" }: Loading
   return (
     <div className={cn("flex items-center justify-center min-h-[400px]", className)}>
       <div className="text-center space-y-4">
-        <SvgSpinnersTadpole  className={cn("animate-spin mx-auto text-primary", sizeClasses[size])} />
+        <SvgSpinnersGooeyBalls1  className={cn("animate-spin mx-auto text-primary", sizeClasses[size])} />
     
         {text && <p className="text-sm text-muted-foreground">{text}</p>}
       </div>
@@ -28,5 +28,5 @@ export function Loading({ className, text = "Loading...", size = "md" }: Loading
 }
 
 export function LoadingSpinner({ className, size = "md" }: { className?: string; size?: "sm" | "md" | "lg" }) {
-  return <SvgSpinnersTadpole  className={cn("animate-spin text-primary", sizeClasses[size], className)} />;
+  return <SvgSpinnersGooeyBalls1  className={cn("animate-spin text-primary", sizeClasses[size], className)} />;
 }

@@ -22,11 +22,26 @@ export const list = query({
 
     const enrichedLogs = await Promise.all(
       logs.map(async (log) => {
-        const user = await ctx.db.get(log.userId);
+        const [user, organization] = await Promise.all([
+          ctx.db.get(log.userId),
+          ctx.db.get(log.organizationId),
+        ]);
         return {
           ...log,
           user: user
-            ? { id: user._id, name: user.name, email: user.email, image: user.image }
+            ? {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                image: user.image,
+              }
+            : null,
+          organization: organization
+            ? {
+                id: organization._id,
+                name: organization.name,
+                image: organization.logo,
+              }
             : null,
         };
       })
@@ -74,10 +89,19 @@ export const getRecent = query({
         return {
           ...log,
           user: user
-            ? { id: user._id, name: user.name, email: user.email, image: user.image }
+            ? {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                image: user.image,
+              }
             : null,
           organization: organization
-            ? { id: organization._id, name: organization.name }
+            ? {
+                id: organization._id,
+                name: organization.name,
+                image: organization.logo,
+              }
             : null,
         };
       })

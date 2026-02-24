@@ -23,6 +23,7 @@ const inputVariants = cva(
   }
 )
 
+// @ts-expect-error size property conflict
 interface InputProps
   extends React.ComponentProps<"input">,
     VariantProps<typeof inputVariants> {}
@@ -34,7 +35,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         ref={ref}
         type={type}
         data-slot="input"
-        className={cn(inputVariants({ size, className }))}
+        className={cn(inputVariants({ size: size as any, className }))}
         {...props}
       />
     )

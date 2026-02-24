@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useMutation } from "convex/react";
+import { useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { handleMutationError, handleMutationSuccess } from "@/lib/error-handler";
 
@@ -23,7 +23,7 @@ export function OrganizationStep({
   const [organizationSlug, setOrganizationSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
 
-  const generateSlug = useMutation(api.onboarding.generateSlug);
+  const generateSlug = useAction(api.onboarding.generateSlug);
 
   // Auto-generate slug from organization name if user hasn't manually edited it
   useEffect(() => {

@@ -21,7 +21,7 @@ export const list = query({
       })
     );
 
-    return organizations.filter(Boolean);
+    return organizations.filter((org) => org !== null) as Array<NonNullable<typeof organizations[number]>>;
   },
 });
 

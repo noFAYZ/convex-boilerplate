@@ -1,20 +1,25 @@
 "use client";
 
 import { ActivityTimeline } from "@/components/activity/activity-timeline";
+import { useOrganization } from "@/components/organizations/org-context";
 
 export default function ActivityPage() {
+  const { currentOrganization } = useOrganization();
+
   return (
-    <div className="max-w-4xl space-y-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight">Activity Log</h1>
-        <p className="text-sm text-muted-foreground">
-          Monitor all activity across your organizations in real-time
+    <div className="mx-auto w-full max-w-4xl px-4 py-6">
+      {/* Activity Log Header */}
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold">Activity Log</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Monitor all activity in {currentOrganization?.name || "your organization"}
         </p>
       </div>
 
-      <div className="bg-card border rounded-lg p-6">
-        <ActivityTimeline limit={100} />
-      </div>
+      {/* Activity Timeline */}
+      {currentOrganization && (
+        <ActivityTimeline organizationId={currentOrganization._id} limit={100} />
+      )}
     </div>
   );
 }

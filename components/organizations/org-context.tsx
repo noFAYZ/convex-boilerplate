@@ -50,8 +50,8 @@ export function OrgProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (organizations && organizations.length > 0) {
       // If no org is selected or selected org doesn't exist, use first org
-      if (!currentOrgId || !organizations.find((o) => o._id === currentOrgId)) {
-        const defaultOrg = organizations[0];
+      if (!currentOrgId || !organizations.find((o: any) => o._id === currentOrgId)) {
+        const defaultOrg = organizations[0]!;
         setCurrentOrgId(defaultOrg._id);
         if (typeof window !== "undefined") {
           localStorage.setItem(STORAGE_KEY, defaultOrg._id);
@@ -62,7 +62,7 @@ export function OrgProvider({ children }: { children: ReactNode }) {
 
   // Get current organization object
   const currentOrganization =
-    organizations?.find((org) => org._id === currentOrgId) || organizations?.[0] || null;
+    organizations?.find((org: any) => org._id === currentOrgId) || organizations?.[0] || null;
 
   // Function to switch organizations
   const setCurrentOrganization = (org: Organization) => {

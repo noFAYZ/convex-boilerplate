@@ -43,6 +43,13 @@ export function parseError(error: unknown): {
     };
   }
 
+  if (normalizedMessage.includes("cannot remove last owner")) {
+    return {
+      title: "Cannot Remove Last Owner",
+      message: "This is the last owner of the organization. Assign another member as owner before removing this member.",
+    };
+  }
+
   if (normalizedMessage.includes("not found")) {
     return {
       title: "Not Found",
@@ -96,6 +103,41 @@ export function parseError(error: unknown): {
     return {
       title: "Invalid Slug",
       message: message,
+    };
+  }
+
+  if (normalizedMessage.includes("insufficient permissions")) {
+    return {
+      title: "Insufficient Permissions",
+      message: "You don't have permission to perform this action.",
+    };
+  }
+
+  if (normalizedMessage.includes("cannot change your own role")) {
+    return {
+      title: "Cannot Change Your Role",
+      message: "You cannot change your own role. Ask another owner to change it.",
+    };
+  }
+
+  if (normalizedMessage.includes("user is already a member")) {
+    return {
+      title: "Already a Member",
+      message: "This user is already a member of the organization.",
+    };
+  }
+
+  if (normalizedMessage.includes("only owner can")) {
+    return {
+      title: "Owner Action Required",
+      message: "Only an owner can perform this action.",
+    };
+  }
+
+  if (normalizedMessage.includes("organization not found")) {
+    return {
+      title: "Organization Not Found",
+      message: "The organization you're trying to access does not exist.",
     };
   }
 

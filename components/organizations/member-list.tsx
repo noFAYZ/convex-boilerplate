@@ -32,7 +32,7 @@ function getInitials(name?: string): string {
 }
 
 interface MemberRowProps {
-  member: Awaited<ReturnType<typeof api.members.list>>[number];
+  member: any;
   onRoleChange: (role: "owner" | "admin" | "member") => Promise<void>;
   onRemove: () => Promise<void>;
   isLoading?: boolean;
@@ -168,7 +168,7 @@ export function MemberList({ organizationId }: MemberListProps) {
 
   return (
     <div className="space-y-3">
-      {members.map((member) => (
+      {members.map((member: any) => (
         <MemberRow
           key={member._id}
           member={member}

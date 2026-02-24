@@ -56,8 +56,8 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Nav */}
-      <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-lg">
-        <div className="container mx-auto px-6 h-14 flex items-center justify-between">
+      <header className="sticky top-0 z-50   bg-background/80 backdrop-blur-lg">
+        <div className="max-w-3xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-foreground flex items-center justify-center text-background font-semibold text-[10px]">
               CB
@@ -74,7 +74,7 @@ export default function HomePage() {
       </header>
 
       {/* Hero */}
-      <section className="relative">
+      <section className="relative ">
         <div className="container mx-auto px-6 pt-24 pb-28">
           <div className="max-w-2xl mx-auto text-center space-y-6">
             <p className="text-sm font-medium text-muted-foreground">
@@ -113,7 +113,7 @@ export default function HomePage() {
       </section>
 
       {/* Features */}
-      <section className="border-t">
+      <section className="">
         <div className="container mx-auto px-6 py-20">
           <div className="text-center mb-14 space-y-3">
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
@@ -144,7 +144,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA */}
-      <section className="border-t">
+      <section >
         <div className="container mx-auto px-6 py-20">
           <div className="max-w-md mx-auto text-center space-y-5">
             <h2 className="text-2xl font-bold tracking-tight">
@@ -164,7 +164,7 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-6">
+      <footer className="py-6 max-w-3xl mx-auto">
         <div className="container mx-auto px-6 flex items-center justify-between text-xs text-muted-foreground">
           <span>Convex Boilerplate</span>
           <span>Built with Next.js & Convex</span>
