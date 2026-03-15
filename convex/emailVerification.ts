@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, action } from "./_generated/server";
-import { api } from "./_generated/api";
+import { internal } from "./_generated/api";
 import { logActivity } from "./lib/helpers";
 
 // Generate a random 6-digit code
@@ -48,12 +48,16 @@ export const requestVerification = mutation({
       createdAt: Date.now(),
     });
 
-    // Schedule email send
-    await ctx.scheduler.runAfter(0, api.actions.email.sendVerificationEmail, {
+    // Send email synchronously to ensure it completes
+    const emailResult = await ctx.runAction(internal.actions.email.sendVerificationEmail, {
       email,
       code,
       userName: user.name || "User",
     });
+
+    if (!emailResult.success) {
+      throw new Error(`Failed to send verification email: ${emailResult.reason}`);
+    }
 
     return { success: true };
   },

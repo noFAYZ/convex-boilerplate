@@ -76,7 +76,7 @@ function ComboboxInput({
               variant: "ghost",
               render: <ComboboxTrigger />,
               "data-slot": "input-group-button",
-              className: "group-has-data-[slot=combobox-clear]/input-group:hidden data-pressed:bg-transparent",
+              className: "group-has-data-[slot=combobox-clear]/input-group:hidden data-pressed:bg-transparent border",
               disabled: disabled,
             }
           )
@@ -91,7 +91,7 @@ function ComboboxInput({
 function ComboboxContent({
   className,
   side = "bottom",
-  sideOffset = 6,
+  sideOffset = 0,
   align = "start",
   alignOffset = 0,
   anchor,
@@ -115,9 +115,39 @@ function ComboboxContent({
           data-slot="combobox-content"
           data-chips={!!anchor}
           className={cn(
-                                            "bg-popover text-popover-foreground data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 ring-foreground/10 *:data-[slot=input-group]:bg-input/20 dark:bg-popover overflow-hidden rounded-lg shadow-md ring-1 duration-100 *:data-[slot=input-group]:m-1 *:data-[slot=input-group]:mb-0 *:data-[slot=input-group]:h-7 *:data-[slot=input-group]:border-none *:data-[slot=input-group]:shadow-none data-[side=inline-start]:slide-in-from-right-2 data-[side=inline-end]:slide-in-from-left-2 dark group/combobox-content relative max-h-(--available-height) w-(--anchor-width) max-w-(--available-width) min-w-[calc(var(--anchor-width)+--spacing(7))] origin-(--transform-origin) data-[chips=true]:min-w-(--anchor-width)",
-                                            className
-                                          )}
+            /* Apple glass effect */
+            "bg-popover backdrop-blur-xl text-popover-foreground",
+
+            /* Apple shadow */
+            "shadow  border  ",
+
+            /* Smooth Apple animation */
+            "data-open:animate-[apple-pop-in_120ms_cubic-bezier(0.16,1,0.3,1)]",
+            "data-closed:animate-[apple-pop-out_100ms_ease-in]",
+
+            /* Layout */
+            "overflow-hidden rounded",
+
+            /* existing layout logic */
+            "relative group/combobox-content",
+            "max-h-(--available-height)",
+            "w-(--anchor-width)",
+            "max-w-(--available-width)",
+            "min-w-[calc(var(--anchor-width)+--spacing(2))]",
+            "origin-(--transform-origin)",
+            "data-[chips=true]:min-w-(--anchor-width)",
+
+            /* input styling */
+            "*:data-[slot=input-group]:bg-input/20",
+            "dark:*:data-[slot=input-group]:bg-input/30",
+            "*:data-[slot=input-group]:m-1",
+            "*:data-[slot=input-group]:mb-0",
+            "*:data-[slot=input-group]:h-7",
+            "*:data-[slot=input-group]:border-none",
+            "*:data-[slot=input-group]:shadow-none",
+
+            className
+          )}
           {...props}
         />
       </ComboboxPrimitive.Positioner>
@@ -130,7 +160,7 @@ function ComboboxList({ className, ...props }: ComboboxPrimitive.List.Props) {
     <ComboboxPrimitive.List
       data-slot="combobox-list"
       className={cn(
-        "no-scrollbar max-h-[min(calc(--spacing(72)---spacing(9)),calc(var(--available-height)---spacing(9)))] scroll-py-1 p-1 data-empty:p-0 overflow-y-auto overscroll-contain",
+        "no-scrollbar max-h-[min(calc(--spacing(72)---spacing(2)),calc(var(--available-height)---spacing(9)))] scroll-py-1    p-0 overflow-y-auto overscroll-contain",
         className
       )}
       {...props}
@@ -147,7 +177,9 @@ function ComboboxItem({
     <ComboboxPrimitive.Item
       data-slot="combobox-item"
       className={cn(
-        "data-highlighted:bg-accent data-highlighted:text-accent-foreground not-data-[variant=destructive]:data-highlighted:**:text-accent-foreground min-h-7 gap-2 rounded-md px-2 py-1 text-xs/relaxed [&_svg:not([class*='size-'])]:size-3.5 relative flex w-full cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+        "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
+         "min-h-7 gap-3 px-3 py-2 text-xs/relaxed",
+        "relative flex w-full cursor-default items-center outline-hidden select-none [&_svg:not([class*='size-'])]:size-5 first:rounded-t-xl last:rounded-b",
         className
       )}
       {...props}
@@ -156,7 +188,7 @@ function ComboboxItem({
       <ComboboxPrimitive.ItemIndicator
         render={<span className="pointer-events-none absolute right-2 flex items-center justify-center" />}
       >
-        <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} className="pointer-events-none" />
+        <HugeiconsIcon icon={Tick02Icon}  className="pointer-events-none " />
       </ComboboxPrimitive.ItemIndicator>
     </ComboboxPrimitive.Item>
   )

@@ -24,7 +24,7 @@ export function AuthButton({ isCollapsed = false }: AuthButtonProps) {
 
   // User is authenticated
   if (currentUser) {
-    return !isCollapsed ? (
+    return isCollapsed ? (
       <Button
         variant="destructive"
         size="icon"
@@ -35,8 +35,9 @@ export function AuthButton({ isCollapsed = false }: AuthButtonProps) {
       </Button>
     ) : (
       <Button
-        variant="outline"
-        size="sm"
+        variant="destructive"
+        size="sm"     
+        
         onClick={() => void signOut()}
 
       >

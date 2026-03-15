@@ -136,7 +136,7 @@ function DialogClose({
   return (
     <DialogPrimitive.Close
       data-slot="dialog-close"
-      render={<Button variant={variant} />}
+      render={<Button variant={variant} size={size} />}
       {...props}
     />
   )

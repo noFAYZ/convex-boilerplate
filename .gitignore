@@ -53,3 +53,5 @@ convex/_generated/
 
 # claude
 .claude/
+
+/docs

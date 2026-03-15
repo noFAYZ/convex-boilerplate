@@ -56,8 +56,8 @@ const SidebarNavLink = memo<SidebarNavLinkProps>(
         asChild
         variant={isActive ? `outline` : "ghost"}
         className={cn(
-            "w-full justify-start p-1  text-sm font-medium rounded-sm group",
-            isActive && "bg-background border-border/20 "
+            "w-full justify-start p-2  text-[13px] font-medium rounded group ",
+            isActive && "bg-background  "
           )}
       >
         <Link
@@ -69,7 +69,7 @@ const SidebarNavLink = memo<SidebarNavLinkProps>(
             icon={item.icon}
             className={cn(
               "h-4 w-4 shrink-0 transition-transform duration-75",
-              isActive && "group-hover:scale-105"
+              isActive && "group-hover:scale-102"
             )}
           />
           <span className="flex-1 truncate">{item.name}</span>
@@ -157,17 +157,17 @@ export const Sidebar = memo(() => {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-50 h-full w-64 bg-sidebar    lg:translate-x-0 lg:static lg:z-0 flex flex-col",
+          "fixed left-0 top-0 z-50 h-full w-64  border-r bg-background   lg:translate-x-0 lg:static lg:z-0 flex flex-col",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
        
       >
         {/* Header with Organization Switcher */}
-        <div className="px-3 py-4 flex items-center justify-between gap-2">
+     {/*    <div className="px-3 py-4 flex items-center justify-between gap-1 ">
           <div className="flex-1 min-w-0">
             <OrgSwitcher />
             
-          </div>
+          </div> 
 <NotificationBell />
           <Button
             variant="ghost"
@@ -178,7 +178,7 @@ export const Sidebar = memo(() => {
           >
             <HugeiconsIcon icon={Cancel01Icon} className="h-4 w-4" />
           </Button>
-        </div>
+        </div>*/}
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
@@ -192,7 +192,7 @@ export const Sidebar = memo(() => {
         </nav>
 
         {/* Footer with Settings */}
-        <div className="px-3 py-4 space-y-3"  >
+        <div className="px-2 py-2 space-y-2 border-t"  >
    
           <div className="flex items-center justify-between px-2 pt-2">
             <AuthButton isCollapsed={false} />
@@ -204,7 +204,7 @@ export const Sidebar = memo(() => {
                 asChild
                 variant="outline"
                 className="rounded-full border-border/30 shadow-xs"
-                size="icon"
+                size="icon-md"
               >
                 <Link href="/settings/profile" className="flex w-8 h-8 items-center gap-3">
                   <HugeiconsIcon

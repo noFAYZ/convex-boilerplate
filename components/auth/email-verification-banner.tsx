@@ -58,7 +58,7 @@ export function EmailVerificationBanner() {
           {isLoading ? "Sending..." : "Verify now"}
         </Button>
 
-        <Button
+      {/*   <Button
           variant="ghost"
           size="icon"
           className="flex-shrink-0 h-5 w-5 hover:bg-amber-100 dark:hover:bg-amber-900/30"
@@ -68,7 +68,7 @@ export function EmailVerificationBanner() {
           aria-label="Dismiss"
         >
           <HugeiconsIcon icon={CloseIcon} className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-        </Button>
+        </Button> */}
       </div>
 
       {/* Verification Dialog */}

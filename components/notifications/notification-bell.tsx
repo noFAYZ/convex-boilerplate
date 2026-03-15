@@ -33,14 +33,12 @@ export function NotificationBell() {
     <div className="relative">
       <Button
         variant="ghost"
-        size="icon-xl"
-        className={cn(
-          "relative h-9 w-9 rounded  "
-        )}
+        size="icon-lg"
+        className="relative w-9 h-9 p-0.5 rounded-full"
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Notifications"
       >
-        <HugeiconsIcon icon={Bell} className="h-6 w-6" />
+        <HugeiconsIcon icon={Bell} className="h-9 w-9" />
 
         {/* Unread badge */}
         {unreadCount !== undefined && unreadCount > 0 && (
@@ -52,7 +50,7 @@ export function NotificationBell() {
       {isOpen && (
         <div
           ref={panelRef}
-          className="absolute left-0 top-full mt-2 w-96 max-h-96 bg-background border border-border/50 rounded-lg shadow-lg z-50 overflow-hidden flex flex-col"
+          className="absolute right-0 top-full mt-2 w-96 max-h-96 bg-background border border-border/50 rounded-lg shadow-lg z-50 overflow-hidden flex flex-col"
         >
           <NotificationPanel onClose={() => setIsOpen(false)} />
         </div>

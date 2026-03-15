@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Loading01Icon, AlertCircleIcon } from "@hugeicons/core-free-icons";
 import { DeleteAccountDialog } from "@/components/profile/delete-account-dialog";
+import { SvgSpinnersTadpole } from "@/components/icons/icons";
 
 export default function ProfileSettingsPage() {
   const currentUser = useQuery(api.users.getCurrent);
@@ -118,7 +119,7 @@ export default function ProfileSettingsPage() {
             <Button type="submit" disabled={isLoading}       size='sm'>
               {isLoading ? (
                 <>
-                  <HugeiconsIcon icon={Loading01Icon} className="mr-2 h-4 w-4 animate-spin" />
+                 <SvgSpinnersTadpole className="h-5 w-5 animate-spin shrink-0 " />
                   Saving...
                 </>
               ) : (

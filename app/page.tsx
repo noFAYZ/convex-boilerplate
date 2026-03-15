@@ -56,8 +56,8 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Nav */}
-      <header className="sticky top-0 z-50   bg-background/80 backdrop-blur-lg">
-        <div className="max-w-3xl mx-auto px-6 h-14 flex items-center justify-between">
+      <header className="sticky top-0 z-50  mt-3 max-w-2xl mx-auto  rounded-xl bg-background/60 backdrop-blur-lg">
+        <div className=" px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-foreground flex items-center justify-center text-background font-semibold text-[10px]">
               CB
@@ -153,7 +153,7 @@ export default function HomePage() {
             <p className="text-muted-foreground">
               Clone the repo, configure your Convex project, and start building.
             </p>
-            <Button size="lg" className="h-10 px-6 text-sm gap-2" asChild>
+            <Button   className="  text-sm gap-1" asChild>
               <Link href="/register">
                 Start Building
                 <HugeiconsIcon icon={ArrowRight01Icon} className="h-3.5 w-3.5" />

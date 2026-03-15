@@ -51,7 +51,7 @@ const myFont3 = localFont({
   variable: '--font-archia',
   display: 'swap',
 })
-
+*/
 const myFont4 = localFont({
   src: [
     {
@@ -61,7 +61,7 @@ const myFont4 = localFont({
   ],
   variable: '--font-archia',
   display: 'swap',
-}) */
+}) 
 
 export default function RootLayout({
   children,
@@ -70,7 +70,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body  className={`${geistSans.className}  antialiased`}  >
+      <body  className={`${myFont4.className}  antialiased`}  >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ConvexClientProvider>{children}</ConvexClientProvider>
           <Toaster />
